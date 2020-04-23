@@ -4,10 +4,10 @@ package body Board.Piece is
   function Fits(Piece: Piece_T; At_Point: Point_T; On_Board: Board_T)
     return Boolean is
     Piece_Begin_X: constant Positive := At_Point.X;
-    Piece_End_X: constant Positive := At_Point.X + Piece'Length(1);
+    Piece_End_X: constant Positive := At_Point.X + Piece'Length(1) - 1;
 
     Piece_Begin_Y: constant Positive := At_Point.Y;
-    Piece_End_Y: constant Positive := At_Point.Y + Piece'Length(2);
+    Piece_End_Y: constant Positive := At_Point.Y + Piece'Length(2) - 1;
 
     Board_Width: constant Positive := On_Board'Length(1);
     Board_Heigth: constant Positive := On_Board'Length(2);

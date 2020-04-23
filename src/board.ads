@@ -25,13 +25,13 @@ package Board is
         when Occupied => Field: Field_T;
       end case;
     end record;
-  type Board_T is private;
+
+  type Board_T is array(X_Coordinate_T, Y_Coordinate_T) of Board_Field_T;
 
   function NewBoard return Board_T;
 
 private
 
-  type Board_T is array(X_Coordinate_T, Y_Coordinate_T) of Board_Field_T;
 
 
 end Board;
