@@ -2,6 +2,7 @@ generic
   Width: Positive;
   Height: Positive;
 package Board is
+
   subtype X_Coordinate_T is Positive range 1 .. Width;
   subtype Y_Coordinate_T is Positive range 1 .. Height;
 
@@ -12,25 +13,25 @@ package Board is
 
   type Direction_T is (North, East, South, West);
 
-  type Placement_T is record
-    Point: Point_T;
-    Direction: Direction_T;
-  end record;
-
-
   type Connector_T is (Empty, Closed, Open, Inner);
 
   type Field_T is array (Direction_T) of Connector_T;
-  type Field_Access_T is access constant Field_T;
 
+  type Board_Field_Status_T is (Empty, Occupied);
+  type Board_Field_T (Status: Board_Field_Status_T := Empty) is
+    record
+      case Status is
+        when Empty => null;
+        when Occupied => Field: Field_T;
+      end case;
+    end record;
   type Board_T is private;
-  type Coordinate_Set_T is array (X_Coordinate_T, Y_Coordinate_T) of Boolean;
 
   function NewBoard return Board_T;
 
 private
 
-  type Board_T is array(X_Coordinate_T, Y_Coordinate_T) of Field_Access_T;
+  type Board_T is array(X_Coordinate_T, Y_Coordinate_T) of Board_Field_T;
 
 
 end Board;

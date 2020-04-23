@@ -29,51 +29,39 @@ package body Piece_Test is
     --   x o o   -- v  o x   --   x o x   -- |  o x   --
     ----------------------------------------------------
     East_Piece: constant Piece_T := (
-      1 => (1 => new Field_T'(North => Closed, East => Inner, South => Inner, West => Open),
-            2 => new Field_T'(North => Inner, East => Inner, South => Closed, West => Closed)),
-      2 => (1 => new Field_T'(North => Open, East => Inner, South => Inner, West => Inner),
-            2 => new Field_T'(North => Inner, East => Inner, South => Open, West => Inner)),
-      3 => (1 => new Field_T'(North => Closed, East => Closed, South => Inner, West => Inner),
-            2 => new Field_T'(North => Inner, East => Open, South => Open, West => Inner)));
+      1 => (1 => (North => Closed, East => Inner, South => Inner, West => Open),
+            2 => (North => Inner, East => Inner, South => Closed, West => Closed)),
+      2 => (1 => (North => Open, East => Inner, South => Inner, West => Inner),
+            2 => (North => Inner, East => Inner, South => Open, West => Inner)),
+      3 => (1 => (North => Closed, East => Closed, South => Inner, West => Inner),
+            2 => (North => Inner, East => Open, South => Open, West => Inner)));
     South_Piece: constant Piece_T := (
-      1 => (1 => new Field_T'(North => Closed, East => Inner, South => Inner, West => Closed),
-            2 => new Field_T'(North => Inner, East => Inner, South => Inner, West => Open),
-            3 => new Field_T'(North => Inner, East => Inner, South => Open, West => Open)),
-      2 => (1 => new Field_T'(North => Open, East => Closed, South => Inner, West => Inner),
-            2 => new Field_T'(North => Inner, East => Open, South => Inner, West => Inner),
-            3 => new Field_T'(North => Inner, East => Closed, South => Closed, West => Inner)));
+      1 => (1 => (North => Closed, East => Inner, South => Inner, West => Closed),
+            2 => (North => Inner, East => Inner, South => Inner, West => Open),
+            3 => (North => Inner, East => Inner, South => Open, West => Open)),
+      2 => (1 => (North => Open, East => Closed, South => Inner, West => Inner),
+            2 => (North => Inner, East => Open, South => Inner, West => Inner),
+            3 => (North => Inner, East => Closed, South => Closed, West => Inner)));
     West_Piece: constant Piece_T := (
-      1 => (1 => new Field_T'(North => Open, East => Inner, South => Inner, West => Open),
-            2 => new Field_T'(North => Inner, East => Inner, South => Closed, West => Closed)),
-      2 => (1 => new Field_T'(North => Open, East => Inner, South => Inner, West => Inner),
-            2 => new Field_T'(North => Inner, East => Inner, South => Open, West => Inner)),
-      3 => (1 => new Field_T'(North => Closed, East => Closed, South => Inner, West => Inner),
-            2 => new Field_T'(North => Inner, East => Open, South => Closed, West => Inner)));
+      1 => (1 => (North => Open, East => Inner, South => Inner, West => Open),
+            2 => (North => Inner, East => Inner, South => Closed, West => Closed)),
+      2 => (1 => (North => Open, East => Inner, South => Inner, West => Inner),
+            2 => (North => Inner, East => Inner, South => Open, West => Inner)),
+      3 => (1 => (North => Closed, East => Closed, South => Inner, West => Inner),
+            2 => (North => Inner, East => Open, South => Closed, West => Inner)));
     North_Piece: constant Piece_T := (
-      1 => (1 => new Field_T'(North => Closed, East => Inner, South => Inner, West => Closed),
-            2 => new Field_T'(North => Inner, East => Inner, South => Inner, West => Open),
-            3 => new Field_T'(North => Inner, East => Inner, South => Open, West => Closed)),
-      2 => (1 => new Field_T'(North => Open, East => Open, South => Inner, West => Inner),
-            2 => new Field_T'(North => Inner, East => Open, South => Inner, West => Inner),
-            3 => new Field_T'(North => Inner, East => Closed, South => Closed, West => Inner)));
+      1 => (1 => (North => Closed, East => Inner, South => Inner, West => Closed),
+            2 => (North => Inner, East => Inner, South => Inner, West => Open),
+            3 => (North => Inner, East => Inner, South => Open, West => Closed)),
+      2 => (1 => (North => Open, East => Open, South => Inner, West => Inner),
+            2 => (North => Inner, East => Open, South => Inner, West => Inner),
+            3 => (North => Inner, East => Closed, South => Closed, West => Inner)));
 
-    procedure Test_Piece_Equivalence (LHS, RHS: Piece_T) is
-    begin
-      AUnit.Assertions.Assert (LHS'First(1) = RHS'First(1), "Equivalent first (1)");
-      AUnit.Assertions.Assert (LHS'First(2) = RHS'First(2), "Equivalent first (2)");
-      AUnit.Assertions.Assert (LHS'Last(1) = RHS'Last(1), "Equivalent last (1)");
-      AUnit.Assertions.Assert (LHS'Last(2) = RHS'Last(2), "Equivalent last (2)");
-      for X in LHS'Range(1) loop
-        for Y in LHS'Range(2) loop
-          AUnit.Assertions.Assert (LHS(X, Y).all = RHS(X, Y).all, "Equivalent element <" & Positive'Image(X) & ", " & Positive'Image(Y) & ">");
-        end loop;
-      end loop;
-    end Test_Piece_Equivalence;
   begin
-    Test_Piece_Equivalence (Piece_10.Rotate_Piece(East_Piece, East), East_Piece);
-    Test_Piece_Equivalence (Piece_10.Rotate_Piece(East_Piece, South), South_Piece);
-    Test_Piece_Equivalence (Piece_10.Rotate_Piece(East_Piece, West), West_Piece);
-    Test_Piece_Equivalence (Piece_10.Rotate_Piece(East_Piece, North), North_Piece);
+    AUnit.Assertions.Assert (Piece_10.Rotate_Piece(East_Piece, East) = East_Piece, "East rotation test");
+    AUnit.Assertions.Assert (Piece_10.Rotate_Piece(East_Piece, South) = South_Piece, "South rotation test");
+    AUnit.Assertions.Assert (Piece_10.Rotate_Piece(East_Piece, West) = West_Piece, "West rotation test");
+    AUnit.Assertions.Assert (Piece_10.Rotate_Piece(East_Piece, North) = North_Piece, "North rotation test");
   end Test_Rotation;
 
 end Piece_Test;
