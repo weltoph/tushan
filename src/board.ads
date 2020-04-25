@@ -13,11 +13,12 @@ package Board is
 
   type Direction_T is (North, East, South, West);
 
-  type Connector_T is (Empty, Closed, Open, Inner);
+  type Connector_T is (Closed, Open, Inner);
 
   type Field_T is array (Direction_T) of Connector_T;
 
   type Board_Field_Status_T is (Empty, Occupied);
+
   type Board_Field_T (Status: Board_Field_Status_T := Empty) is
     record
       case Status is
@@ -26,12 +27,13 @@ package Board is
       end case;
     end record;
 
+  Board_Error: exception;
+
   type Board_T is array(X_Coordinate_T, Y_Coordinate_T) of Board_Field_T;
 
   function NewBoard return Board_T;
 
 private
-
 
 
 end Board;
