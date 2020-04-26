@@ -8,7 +8,8 @@ package Piece_Test is
 
   function Name (T: Piece_Test) return AUnit.Message_String;
 
-  procedure Test_Rotation (T: in out AUnit.Test_Cases.Test_Case'Class);
-  procedure Test_Fit (T: in out AUnit.Test_Cases.Test_Case'Class);
+  procedure Test_Place (T: in out AUnit.Test_Cases.Test_Case'Class);
+  --  procedure Test_Rotation (T: in out AUnit.Test_Cases.Test_Case'Class);
+  --  procedure Test_Fit (T: in out AUnit.Test_Cases.Test_Case'Class);
 
 end Piece_Test;
