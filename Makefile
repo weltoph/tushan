@@ -1,8 +1,15 @@
-.PHONY: main tests
+.PHONY: run-tests
 
-tests:
-	gprbuild -P tests
-	./dist/run_tests
+SRCDIR=src
+TESTDIR=src/tests
 
-main:
-	gprbuild -P main
+SRC=$(wildcard ${SRCDIR}/*.ad?)
+TESTSRC=$(wildcard ${TESTDIR}/*.ad?)
+
+run-tests: dist/run_tests
+	dist/run_tests
+
+dist/run_tests: ${TESTSRC} ${SRC}
+	mkdir -p .build
+	mkdir -p dist
+	gnatmake -aIsrc -D .build -o dist/run_tests src/tests/run_tests

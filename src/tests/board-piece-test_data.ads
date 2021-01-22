@@ -1,20 +1,5 @@
 generic
 package Board.Piece.Test_Data is
-  --------------------------------------------------
-  --  Original --  Once   --  Twice    -- Thrice  --
-  --           --   x o   --           --   x o   --
-  --   x o x   -- x|_|_|x --   o o x   -- x|_|_|o --
-  -- o|_|_|_|x -- o|_|_|o -- o|_|_|_|x -- o|_|_|o --
-  -- x|_|_|_|o -- o|_|_|x -- x|_|_|_|o -- x|_|_|x --
-  --   x o o   --   o x   --   x o x   --   o x   --
-  --------------------------------------------------
-  Original_Piece: constant Piece_T := (
-    1 => (1 => (North => Closed, East => Inner, South => Inner, West => Open),
-          2 => (North => Inner, East => Inner, South => Closed, West => Closed)),
-    2 => (1 => (North => Open, East => Inner, South => Inner, West => Inner),
-          2 => (North => Inner, East => Inner, South => Open, West => Inner)),
-    3 => (1 => (North => Closed, East => Closed, South => Inner, West => Inner),
-          2 => (North => Inner, East => Open, South => Open, West => Inner)));
   Once_Rotated_Piece: constant Piece_T := (
     1 => (1 => (North => Closed, East => Inner, South => Inner, West => Closed),
           2 => (North => Inner, East => Inner, South => Inner, West => Open),

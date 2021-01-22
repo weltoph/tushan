@@ -15,17 +15,22 @@ package Board.Stone is
                    Placement_X: X_Coordinate;
                    Placement_Y: Y_Coordinate);
 
---    function Fits (Stone: In Stone_T;
---                   Board: In Out Board_T;
---                   Placement_X: X_Coordinate;
---                   Placement_Y: Y_Coordinate)
---                   return Boolean;
+  function Fits (Stone: In Stone_T;
+                 Board: In Out Board_T;
+                 Placement_X: X_Coordinate;
+                 Placement_Y: Y_Coordinate)
+                 return Boolean;
 
 --    function Connects_Flow (Stone: In Stone_T;
 --                            Board: In Out Board_T;
 --                            Placement_X: X_Coordinate;
 --                            Placement_Y: Y_Coordinate)
 --                            return Boolean;
+  --
+  function Get_Northern_Border (Stone: In Stone_T) return Horizontal_Border_T;
+  function Get_Eastern_Border (Stone: In Stone_T) return Vertical_Border_T;
+  function Get_Southern_Border (Stone: In Stone_T) return Horizontal_Border_T;
+  function Get_Western_Border (Stone: In Stone_T) return Vertical_Border_T;
 
   function Stone_From_Borders(Northern_Border: Horizontal_Border_T;
                               Eastern_Border: Vertical_Border_T;
@@ -33,7 +38,10 @@ package Board.Stone is
                               Western_Border: Vertical_Border_T)
                               return Stone_T;
 
---    function Rotate (Stone: In Stone_T) return Stone_T;
+  function Get_Width (Stone: in Stone_T) return X_Coordinate;
+  function Get_Height (Stone: in Stone_T) return Y_Coordinate;
+
+  function Rotate (Stone: In Stone_T) return Stone_T;
 
   private
 
