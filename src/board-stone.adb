@@ -22,85 +22,67 @@ package body Board.Stone is
     end loop;
   end Place;
 
-  function Get_Northern_Border (Stone: In Stone_T) return Horizontal_Border_T is
-    Width: constant X_Coordinate := Get_Width (Stone);
-    Border: Horizontal_Border_T(1 .. Width) := (others => Closed);
+  function Get_Border (Stone: In Stone_T; Direction: In Direction_T)
+    return Border_T is
+    Width: constant Positive := Get_Width (Stone);
+    Height: constant Positive := Get_Height (Stone);
   begin
-    for X in 1 .. Width loop
-      Border (X) := Stone (X, 1)(North);
-    end loop;
-    return Border;
-  end Get_Northern_Border;
-
-  function Get_Eastern_Border (Stone: In Stone_T) return Vertical_Border_T is
-    Width: constant X_Coordinate := Get_Width (Stone);
-    Height: constant Y_Coordinate := Get_Height (Stone);
-    Border: Vertical_Border_T(1 .. Height) := (others => Closed);
-  begin
-    for Y in 1 .. Height loop
-      Border (Y) := Stone (Width, Y)(East);
-    end loop;
-    return Border;
-  end Get_Eastern_Border;
-
-  function Get_Southern_Border (Stone: In Stone_T) return Horizontal_Border_T is
-    Width: constant X_Coordinate := Get_Width (Stone);
-    Height: constant Y_Coordinate := Get_Height (Stone);
-    Border: Horizontal_Border_T(1 .. Width) := (others => Closed);
-  begin
-    for X in 1 .. Width loop
-      Border (X) := Stone (Width - X + 1, Height)(South);
-    end loop;
-    return Border;
-  end Get_Southern_Border;
-
-  function Get_Western_Border (Stone: In Stone_T) return Vertical_Border_T is
-    Height: constant Y_Coordinate := Get_Height (Stone);
-    Border: Vertical_Border_T(1 .. Height) := (others => Closed);
-  begin
-    for Y in 1 .. Height loop
-      Border (Y) := Stone (1, Height - Y + 1)(West);
-    end loop;
-    return Border;
-  end Get_Western_Border;
+    case Direction is
+      when North =>
+        declare
+          Border: Border_T (1 .. Width) := (others => Closed);
+        begin
+          for X in 1 .. Width loop
+            Border (X) := Stone (X, 1)(North);
+          end loop;
+          return Border;
+        end;
+      when South =>
+        declare
+          Border: Border_T (1 .. Width) := (others => Closed);
+        begin
+          for X in 1 .. Width loop
+            Border (X) := Stone (Width - X + 1, Height)(South);
+          end loop;
+          return Border;
+        end;
+      when East =>
+        declare
+          Border: Border_T (1 .. Height) := (others => Closed);
+        begin
+          for Y in 1 .. Height loop
+            Border (Y) := Stone (Width, Y)(East);
+          end loop;
+          return Border;
+        end;
+      when West =>
+        declare
+          Border: Border_T (1 .. Height) := (others => Closed);
+        begin
+          for Y in 1 .. Height loop
+            Border (Y) := Stone (1, Height - Y + 1)(West);
+          end loop;
+          return Border;
+        end;
+    end case;
+  end Get_Border;
 
   function Rotate (Stone: In Stone_T) return Stone_T is
-    Old_Height: constant Y_Coordinate := Get_Height (Stone);
-    Old_Width: constant X_Coordinate := Get_Width (Stone);
-
-    Old_North: Horizontal_Border_T := Get_Northern_Border (Stone);
-    Old_East: Vertical_Border_T := Get_Eastern_Border (Stone);
-    Old_South: Horizontal_Border_T := Get_Southern_Border (Stone);
-    Old_West: Vertical_Border_T := Get_Western_Border (Stone);
-
-    New_North: Horizontal_Border_T (1 .. Old_Height) := (others => Closed);
-    New_East: Vertical_Border_T (1 .. Old_Width) := (others => Closed);
-    New_South: Horizontal_Border_T (1 .. Old_Height) := (others => Closed);
-    New_West: Vertical_Border_T (1 .. Old_Width) := (others => Closed);
   begin
-    for X in 1 .. Old_Height loop
-      New_North (X) := Old_West (X);
-      New_South (X) := Old_East (X);
-    end loop;
-
-    for Y in 1 .. Old_Width loop
-      New_West (Y) := Old_South (Y);
-      New_East (Y) := Old_North (Y);
-    end loop;
     return Stone_From_Borders (
-      New_North,
-      New_East,
-      New_South,
-      New_West);
+      Get_Border (Stone, West),
+      Get_Border (Stone, North),
+      Get_Border (Stone, East),
+      Get_Border (Stone, South));
   end Rotate;
 
- function Stone_From_Borders(Northern_Border: Horizontal_Border_T;
-                             Eastern_Border: Vertical_Border_T;
-                             Southern_Border: Horizontal_Border_T;
-                             Western_Border: Vertical_Border_T)
+ function Stone_From_Borders(Northern_Border: Border_T;
+                             Eastern_Border: Border_T;
+                             Southern_Border: Border_T;
+                             Western_Border: Border_T)
                              return Stone_T is
-   Width:  constant X_Coordinate := Northern_Border'Length;
-   Height: constant X_Coordinate := Eastern_Border'Length;
+   Width:  constant Positive := Northern_Border'Length;
+   Height: constant Positive := Eastern_Border'Length;
    Stone: Stone_T(1 .. Width, 1 .. Height) := (
      others => (
        others => (North => Inner,
@@ -136,184 +118,111 @@ package body Board.Stone is
    return Stone;
  end Stone_From_Borders;
 
- function Fits (Stone: In Stone_T;
-                Board: In Out Board_T;
-                Placement_X: X_Coordinate;
-                Placement_Y: Y_Coordinate)
-   return Boolean is
-   Width: constant X_Coordinate := Get_Width (Stone);
-   Height: constant X_Coordinate := Get_Height (Stone);
+  function Fits (Stone: In Stone_T;
+    Board: In Out Board_T;
+    Placement_X: X_Coordinate;
+    Placement_Y: Y_Coordinate) return Boolean is
+    Width: constant Positive := Get_Width (Stone);
+    Height: constant Positive := Get_Height (Stone);
 
-   Max_Width: constant X_Coordinate := Board'Length (1) - Placement_X + 1;
-   Max_Height: constant Y_Coordinate := Board'Length (2) - Placement_Y + 1;
- begin
-   -- check out of bounds
-   if Width > Max_Width or Height > Max_Height then
-     return False;
-   end if;
-   -- check that all places on the board are not yet occupied
-   for X in Placement_X .. Placement_X + Width - 1 loop
-     for Y in Placement_Y .. Placement_Y + Height - 1 loop
-       if Board(X, Y).Occupied then
-         return False;
-       end if;
-     end loop;
-   end loop;
-   return True;
- end Fits;
+    Max_Width: constant X_Coordinate := Board'Length (1) - Placement_X + 1;
+    Max_Height: constant Y_Coordinate := Board'Length (2) - Placement_Y + 1;
+  begin
+    -- check out of bounds
+    if Width > Max_Width or Height > Max_Height then
+      return False;
+    end if;
+    -- check that all places on the board are not yet occupied
+    for X in Placement_X .. Placement_X + Width - 1 loop
+      for Y in Placement_Y .. Placement_Y + Height - 1 loop
+        if Board(X, Y).Occupied then
+          return False;
+        end if;
+      end loop;
+    end loop;
+    return True;
+  end Fits;
 
---   function Piece_Connects (On_Board: In Board_T;
---                            Piece: In Piece_T;
---                            At_Point: In Point_T)
---     return Boolean is
---     Northern_Border: constant Horizontal_Border_T
---       := Get_Northern_Border (Piece);
---     Southern_Border: constant Horizontal_Border_T
---       := Get_Southern_Border (Piece);
---     Western_Border: constant Vertical_Border_T
---       := Get_Western_Border (Piece);
---     Eastern_Border: constant Vertical_Border_T
---       := Get_Eastern_Border (Piece);
-
---     Found_Open_Connection: Boolean := False;
-
---     function Check_Combination (Piece_Connector, Opposite : In Connector_T)
---       return Boolean is
---     begin
---       if (Opposite = Open and Northern_Connector = Closed)
---         or (Opposite = Closed and Northern_Connector = Open) then
---         return False;
---       elsif (Opposite = Open and Northern_Connector = Open) then
---         Found_Open_Connection := True;
---       end if;
---       return True;
---     end Check_Combination;
-
---   begin
---     for X in Northern_Border'Range loop
---       declare
---         Relative_X: constant X_Coordinate := X - Northern_Border'First(1);
---         Board_X: constant X_Coordinate := At_Point.X + Relative_X;
---         Northern_Connector: constant Connector_T := Northern_Border(X);
---         Southern_Connector: constant Connector_T := Southern_Border(X);
-
---         Touches_Northern_Border: constant Boolean
---           := At_Point.Y = On_Board'First(2);
---         Touches_Southern_Border: constant Boolean
---           := At_Point.Y = On_Board'Last(2);
---       begin
---         if not Touches_Northern_Border then
---           declare
---             Opposite: constant Connector_T
---               := On_Board(Board_X, At_Point.Y - 1)(South);
---           begin
---             if not Check_Combination (Northern_Connector, Opposite) then
---               return False;
---             end if;
---           end;
---         end if;
-
---         if not Touches_Southern_Border then
---           declare
---             Opposite: constant Connector_T
---               := On_Board(Board_X, At_Point.Y + 1)(North);
---           begin
---             if not Check_Combination (Southern_Connector, Opposite) then
---               return False;
---             end if;
---           end;
---         end if;
---       end;
---     end loop;
-
---     for Y in Western_Border'Range loop
---       declare
---         Relative_Y: constant Y_Coordinate := Y - Western_Border'First;
---         Board_Y: constant Y_Coordinate := At_Point.Y + Relative_Y;
---         Eastern_Connector: constant Connector_T := Eastern_Border(Y);
---         Western_Connector: constant Connector_T := Western_Border(Y);
-
---         Touches_Eastern_Border: constant Boolean
---           := At_Point.X = On_Board'Last(1);
---         Touches_Western_Border: constant Boolean
---           := At_Point.X = On_Board'First(1);
---       begin
---         if not Touches_Eastern_Border then
---           declare
---             Opposite: constant Connector_T
---               := On_Board(At_Point.X + 1, Board_Y)(West);
---           begin
---             if not Check_Combination (Eastern_Connector, Opposite) then
---               return False;
---             end if;
---           end;
---         end if;
-
---         if not Touches_Western_Border then
---           declare
---             Opposite: constant Connector_T
---               := On_Board(At_Point.X - 1, Board_Y)(East);
---           begin
---             if not Check_Combination (Western_Connector, Opposite) then
---               return False;
---             end if;
---           end;
---         end if;
---       end;
---     end loop;
-
---     return Found_Open_Connection;
---   end Piece_Connects;
-
-
---   function Get_Northern_Border (Piece: Piece_T) return Horizontal_Border_T is
---     Width: constant X_Coordinate := Piece'Length(1);
---     Border: Horizontal_Border_T(1 .. Width);
---   begin
---     for X in Border'Range loop
---       Border(X) := Piece(Piece'First(1) + (X - 1), Piece'First(2))(North);
---     end loop;
---     return Border;
---   end Get_Northern_Border;
-
---   function Get_Southern_Border (Piece: Piece_T) return Horizontal_Border_T is
---     Width: constant X_Coordinate := Piece'Length(1);
---     Border: Horizontal_Border_T(1 .. Width);
---   begin
---     for X in Border'Range loop
---       Border(X) := Piece(Piece'First(1) + (X - 1), Piece'Last(2))(South);
---     end loop;
---     return Border;
---   end Get_Southern_Border;
-
---   function Get_Eastern_Border (Piece: Piece_T) return Vertical_Border_T is
---     Height: constant Y_Coordinate := Piece'Length(2);
---     Border: Vertical_Border_T(1 .. Height);
---   begin
---     for Y in Border'Range loop
---       Border(Y) := Piece(Piece'Last(1), Piece'First(2) + (Y - 1))(East);
---     end loop;
---     return Border;
---   end Get_Eastern_Border;
-
---   function Get_Western_Border (Piece: Piece_T) return Vertical_Border_T is
---     Height: constant Y_Coordinate := Piece'Length(2);
---     Border: Vertical_Border_T(1 .. Height);
---   begin
---     for Y in Border'Range loop
---       Border(Y) := Piece(Piece'First(1), Piece'First(2) + (Y - 1))(West);
---     end loop;
---     return Border;
---   end Get_Western_Border;
-
-  function Get_Width (Stone: in Stone_T) return X_Coordinate is
+  function Get_Width (Stone: in Stone_T) return Positive is
   begin
     return Stone'Length (1);
   end Get_Width;
 
-  function Get_Height (Stone: in Stone_T) return Y_Coordinate is
+  function Get_Height (Stone: in Stone_T) return Positive is
   begin
     return Stone'Length (2);
   end Get_Height;
+
+  function Connects (Stone: In Stone_T;
+                     Board: In Out Board_T;
+                     Placement_X: X_Coordinate;
+                     Placement_Y: Y_Coordinate) return Boolean is
+    Northern_Border: constant Border_T := Get_Border (Stone, North);
+    Southern_Border: constant Border_T := Get_Border (Stone, South);
+    Eastern_Border: constant Border_T := Get_Border (Stone, East);
+    Western_Border: constant Border_T := Get_Border (Stone, West);
+    Width: constant Positive := Get_Width (Stone);
+    Height: constant Positive := Get_Height (Stone);
+  begin
+    for X in 1 .. Width loop
+      declare
+        N: constant Inner_Connector_T := Northern_Border (X);
+        ON: constant Connector_T := Get_Opposing_Connector (Board,
+                                                            Placement_X + X - 1,
+                                                            Placement_Y,
+                                                            North);
+        S: constant Inner_Connector_T := Southern_Border (X);
+        OS: constant Connector_T := Get_Opposing_Connector (Board,
+                                                            Width + Placement_X - X,
+                                                            Placement_Y + Height- 1,
+                                                            South);
+      begin
+        if N = Inner or ON = Inner or S = Inner or OS = Inner then
+          -- errorneous state
+          raise Board_Error
+            with "Stone presents <Inner> as connector of a border.";
+        end if;
+        if N = Open and ON = Closed then
+          return False;
+        elsif N = Closed and ON = Open then
+          return False;
+        elsif S = Open and OS = Closed then
+          return False;
+        elsif S = Closed and OS = open then
+          return False;
+        end if;
+      end;
+    end loop;
+    for Y in 1 .. Height loop
+      declare
+        E: constant Inner_Connector_T := Eastern_Border (Y);
+        OE: constant Connector_T := Get_Opposing_Connector (Board,
+                                                            Placement_X + Width - 1,
+                                                            Placement_Y + Y - 1,
+                                                            East);
+        W: constant Inner_Connector_T := Western_Border (Y);
+        OW: constant Connector_T := Get_Opposing_Connector (Board,
+                                                            Placement_X,
+                                                            Placement_Y + Height - Y,
+                                                            West);
+      begin
+        if E = Inner or OE = Inner or W = Inner or OW = Inner then
+          -- errorneous state
+          raise Board_Error
+            with "Stone presents <Inner> as connector of a border.";
+        end if;
+        if E = Open and OE = Closed then
+          return False;
+        elsif E = Closed and OE = Open then
+          return False;
+        elsif W = Open and OW = Closed then
+          return False;
+        elsif W = Closed and OW = open then
+          return False;
+        end if;
+      end;
+    end loop;
+    return True;
+  end Connects;
 
 end Board.Stone;

@@ -11,7 +11,11 @@ package body Board is
                           Direction: In Direction_T)
                           return Inner_Connector_T is
   begin
-    return Board(X, Y).Field(Direction);
+    if Is_Occupied (Board, X, Y) then
+      return Board(X, Y).Field(Direction);
+    else
+      return Empty;
+    end if;
   end Get_Connector;
 
 
@@ -28,10 +32,30 @@ package body Board is
       return Outer;
     else
       case Direction is
-        when North => return Board(X, Y - 1).Field(South);
-        when East  => return Board(X + 1, Y).Field(West);
-        when South => return Board(X, Y + 1).Field(North);
-        when West  => return Board(X - 1, Y).Field(East);
+        when North =>
+          if not Is_Occupied (Board, X, Y - 1) then
+            return Empty;
+          else
+            return Board(X, Y - 1).Field(South);
+          end if;
+        when East  =>
+          if not Is_Occupied (Board, X + 1, Y) then
+            return Empty;
+          else
+            return Board(X + 1, Y).Field(West);
+          end if;
+        when South =>
+          if not Is_Occupied (Board, X, Y + 1) then
+            return Empty;
+          else
+            return Board(X, Y + 1).Field(North);
+          end if;
+        when West  =>
+          if not Is_Occupied (Board, X - 1, Y) then
+            return Empty;
+          else
+            return Board(X - 1, Y).Field(East);
+          end if;
       end case;
     end if;
   end Get_Opposing_Connector;
@@ -44,5 +68,37 @@ package body Board is
   begin
     return Board(X, Y).Occupied;
   end Is_Occupied;
+
+  function Contains (Set: In Coordinate_Set_T;
+                     X: In X_Coordinate;
+                     Y: In Y_Coordinate) return Boolean is
+  begin
+    return Set (X, Y);
+  end Contains;
+
+  function Empty (Set: In Coordinate_Set_T;
+                  X: In X_Coordinate;
+                  Y: In Y_Coordinate) return Boolean is
+  begin
+    for X in X_Coordinate loop
+      for Y in Y_Coordinate loop
+        if Set (X, Y) then
+          return False;
+        end if;
+      end loop;
+    end loop;
+    return True;
+  end Empty;
+
+  function Occupied_Places (Board: In Board_T) return Coordinate_Set_T is
+    Places: Coordinate_Set_T := (others => (others => False));
+  begin
+    for X in X_Coordinate loop
+      for Y in Y_Coordinate loop
+        Places (X, Y) := Is_Occupied (Board, X, Y);
+      end loop;
+    end loop;
+    return Places;
+  end Occupied_Places;
 
 end Board;

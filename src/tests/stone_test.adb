@@ -2,19 +2,19 @@ with AUnit.Assertions;
 with Board.Stone;
 with Ada.Text_IO;
 
-package body Piece_Test is
+package body Stone_Test is
   package Board_10 is new Board(10, 10);
   package Stone_10 is new Board_10.Stone;
 
-  procedure Register_Tests (T: in out Piece_Test) is
+  procedure Register_Tests (T: in out Stone_Test) is
       use AUnit.Test_Cases.Registration;
    begin
       Register_Routine (T, Test_Place'Access, "Test placement of stone");
-      Register_Routine (T, Test_Rotation'Access, "Test Rotation of Piece");
-      Register_Routine (T, Test_Fit'Access, "Test Fit of Piece");
+      Register_Routine (T, Test_Rotation'Access, "Test rotation of stone");
+      Register_Routine (T, Test_Fit_and_Connect'Access, "Test fit of stone");
    end Register_Tests;
 
-  function Name (T: Piece_Test) return AUnit.Message_String is
+  function Name (T: Stone_Test) return AUnit.Message_String is
   begin
     return AUnit.Format ("Testing stone");
   end Name;
@@ -177,28 +177,28 @@ package body Piece_Test is
     --   x o o   --   o x   --   x o x   --   o x   --
     --------------------------------------------------
     Original_Stone: constant Stone_T := Stone_From_Borders(
-      Horizontal_Border_T'(1 => Closed, 2 => Open, 3 => Closed),
-      Vertical_Border_T'(1 => Closed, 2 => Open),
-      Horizontal_Border_T'(1 => Open, 2 => Open, 3 => Closed),
-      Vertical_Border_T'(1 => Closed, 2 => Open));
+      Border_T'(1 => Closed, 2 => Open, 3 => Closed),
+      Border_T'(1 => Closed, 2 => Open),
+      Border_T'(1 => Open, 2 => Open, 3 => Closed),
+      Border_T'(1 => Closed, 2 => Open));
 
     Once_Stone: constant Stone_T := Stone_From_Borders(
-      Horizontal_Border_T'(1 => Closed, 2 => Open),
-      Vertical_Border_T'(1 => Closed, 2 => Open, 3 => Closed),
-      Horizontal_Border_T'(1 => Closed, 2 => Open),
-      Vertical_Border_T'(1 => Open, 2 => Open, 3 => Closed));
+      Border_T'(1 => Closed, 2 => Open),
+      Border_T'(1 => Closed, 2 => Open, 3 => Closed),
+      Border_T'(1 => Closed, 2 => Open),
+      Border_T'(1 => Open, 2 => Open, 3 => Closed));
 
     Twice_Stone: constant Stone_T := Stone_From_Borders(
-      Horizontal_Border_T'(1 => Open, 2 => Open, 3 => Closed),
-      Vertical_Border_T'(1 => Closed, 2 => Open),
-      Horizontal_Border_T'(1 => Closed, 2 => Open, 3 => Closed),
-      Vertical_Border_T'(1 => Closed, 2 => Open));
+      Border_T'(1 => Open, 2 => Open, 3 => Closed),
+      Border_T'(1 => Closed, 2 => Open),
+      Border_T'(1 => Closed, 2 => Open, 3 => Closed),
+      Border_T'(1 => Closed, 2 => Open));
 
     Thrice_Stone: constant Stone_T := Stone_From_Borders(
-      Horizontal_Border_T'(1 => Closed, 2 => Open),
-      Vertical_Border_T'(1 => Open, 2 => Open, 3 => Closed),
-      Horizontal_Border_T'(1 => Closed, 2 => Open),
-      Vertical_Border_T'(1 => Closed, 2 => Open, 3 => Closed));
+      Border_T'(1 => Closed, 2 => Open),
+      Border_T'(1 => Open, 2 => Open, 3 => Closed),
+      Border_T'(1 => Closed, 2 => Open),
+      Border_T'(1 => Closed, 2 => Open, 3 => Closed));
 
   begin
     AUnit.Assertions.Assert (Once_Stone = Rotate (Original_Stone),
@@ -211,45 +211,60 @@ package body Piece_Test is
                              "Incremental rotation thrice to original");
   end Test_Rotation;
 
-  procedure Test_Fit (T: in out AUnit.Test_Cases.Test_Case'Class) is
+  procedure Test_Fit_and_Connect (T: in out AUnit.Test_Cases.Test_Case'Class) is
     use Board_10;
     use Stone_10;
 
     Board: Board_T := New_Board;
 
     Placed_Stone: constant Stone_T := Stone_From_Borders(
-      Horizontal_Border_T'(1 => Closed, 2 => Closed, 3 => Closed, 4 => Closed),
-      Vertical_Border_T'(1 => Closed, 2 => Closed, 3 => Closed, 4 => Closed),
-      Horizontal_Border_T'(1 => Closed, 2 => Closed, 3 => Closed, 4 => Closed),
-      Vertical_Border_T'(1 => Closed, 2 => Closed, 3 => Closed, 4 => CLosed));
+      Border_T'(1 => Closed, 2 => Open, 3 => Open, 4 => Closed),
+      Border_T'(1 => Open, 2 => Closed, 3 => Closed, 4 => Open),
+      Border_T'(1 => Open, 2 => Open, 3 => Closed, 4 => Closed),
+      Border_T'(1 => Closed, 2 => Closed, 3 => Open, 4 => Open));
 
     Stone: constant Stone_T := Stone_From_Borders(
-      Horizontal_Border_T'(1 => Closed, 2 => Closed, 3 => Closed, 4 => Closed),
-      Vertical_Border_T'(1 => Closed, 2 => Closed),
-      Horizontal_Border_T'(1 => Closed, 2 => Closed, 3 => Closed, 4 => Closed),
-      Vertical_Border_T'(1 => Closed, 2 => Closed));
+      Border_T'(1 => Open),
+      Border_T'(1 => Open, 2 => Closed),
+      Border_T'(1 => Closed),
+      Border_T'(1 => Closed, 2 => Open));
 
     Placement_X: constant X_Coordinate := 2;
     Placement_Y: constant Y_Coordinate := 4;
 
-    Fitting_Places: constant array (X_Coordinate, Y_Coordinate) of Boolean :=
-      (1 => (1 => True, 2 => True, 8 => True, 9 => True, others => False),
-       2 => (1 => True, 2 => True, 8 => True, 9 => True, others => False),
-       3 => (1 => True, 2 => True, 8 => True, 9 => True, others => False),
-       4 => (1 => True, 2 => True, 8 => True, 9 => True, others => False),
-       5 => (1 => True, 2 => True, 8 => True, 9 => True, others => False),
-       6 => (10 => False, others => True),
-       7 => (10 => False, others => True),
-       others => (others => False));
+    Fitting_Places: constant array (X_Coordinate, Y_Coordinate) of Boolean := (
+      2 => (1 => True, 2 => True, 8 => True, 9 => True, others => False),
+      3 => (1 => True, 2 => True, 8 => True, 9 => True, others => False),
+      4 => (1 => True, 2 => True, 8 => True, 9 => True, others => False),
+      5 => (1 => True, 2 => True, 8 => True, 9 => True, others => False),
+      others => (10 => False, others => True));
+
+    Connecting_Places: constant array (X_Coordinate, Y_Coordinate) of Boolean := (
+      1 => (1 => True, 2 => True, 5 => True, 8 => True, 9 => True, others => False),
+      2 => (1 => True, 2 => True, 9 => True, others => False),
+      3 => (1 => True, 9 => True, others => False),
+      4 => (1 => True, 8 => True, 9 => True, others => False),
+      5 => (1 => True, 2 => True, 8 => True, 9 => True, others => False),
+      6 => (1 => True, 2 => True, 4 => True, 7 => True, 8 => True, 9 => True, others => False),
+      others => (10 => False, others => True));
   begin
     Place (Placed_Stone, Board, Placement_X, Placement_Y);
 
-    for X in Fitting_Places'Range (1) loop
-      for Y in Fitting_Places'Range (2) loop
+    for X in X_Coordinate loop
+      for Y in Y_Coordinate loop
         if Fitting_Places (X, Y) then
           AUnit.Assertions.Assert (Fits (Stone, Board, X, Y),
                                    "Checking fitting placement at <"
                                    & X'Image & "," & Y'Image & ">");
+          if Connecting_Places (X, Y) then
+            AUnit.Assertions.Assert (Connects (Stone, Board, X, Y),
+                                   "Checking connecting placement at <"
+                                   & X'Image & "," & Y'Image & ">");
+          else
+            AUnit.Assertions.Assert (Not Connects (Stone, Board, X, Y),
+                                   "Checking non-connecting placement at <"
+                                   & X'Image & "," & Y'Image & ">");
+          end if;
         else
           AUnit.Assertions.Assert (Not Fits (Stone, Board, X, Y),
                                    "Checking non-fitting placement at <"
@@ -257,6 +272,5 @@ package body Piece_Test is
         end if;
       end loop;
     end loop;
-  end Test_Fit;
-
-end Piece_Test;
+  end Test_Fit_and_Connect;
+end Stone_Test;
