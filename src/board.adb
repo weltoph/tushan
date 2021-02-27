@@ -9,7 +9,7 @@ package body Board is
                           X: In X_Coordinate;
                           Y: In Y_Coordinate;
                           Direction: In Direction_T)
-                          return Inner_Connector_T is
+                          return Connector_T is
   begin
     if Is_Occupied (Board, X, Y) then
       return Board(X, Y).Field(Direction);

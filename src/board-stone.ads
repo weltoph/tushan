@@ -6,6 +6,11 @@ package Board.Stone is
 
   type Stone_T(<>) is private;
 
+  type Bag_T is abstract tagged null record;
+
+  function Is_Empty (Bag: in Bag_T'Class) return Boolean is abstract;
+  function Draw_Stone (Bag: in Bag_T'Class) return Stone_T is abstract;
+
   procedure Place (Stone: In Stone_T;
                    Board: In Out Board_T;
                    Placement_X: X_Coordinate;
