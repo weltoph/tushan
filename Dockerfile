@@ -1,4 +1,4 @@
-FROM debian:bullseye
+FROM debian:buster
 MAINTAINER Christoph Welzel <welzel@in.tum.de>
 
 RUN set -xe \
@@ -8,8 +8,9 @@ RUN set -xe \
                gprbuild \
                gnat \
                build-essential \
-               libaunit20 \
-               libaunit20-dev \
+               libaunit18 \
+               libaunit18-dev \
+               gnat-gps \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get purge --auto-remove \
     && apt-get clean

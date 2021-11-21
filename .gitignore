@@ -1,6 +1,2 @@
-*.ali
-*.o
-*.stderr
-*.stdout
-dist
-.obj
+common/obj
+bin/

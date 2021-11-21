@@ -1,6 +1,8 @@
+with "/usr/share/gpr/aunit.gpr";
+
 project Tushan is
-  for Source_Dirs use ("./src/**", "/usr/share/ada/adainclude/**");
-  for Object_Dir use "./.build";
-  for Exec_Dir use "./dist";
-  For Main use ("./src/tests/run_tests.adb");
+  for Source_Dirs use ("common/**");
+  for Object_Dir use "common/obj";
+  for Exec_Dir use "bin";
+  for Main use ("common/tests/run_tests.adb");
 end Tushan;
