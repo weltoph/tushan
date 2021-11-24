@@ -4,5 +4,5 @@ project Tushan is
   for Source_Dirs use ("common/**");
   for Object_Dir use "common/obj";
   for Exec_Dir use "bin";
-  for Main use ("common/tests/run_tests.adb");
+  for Main use ("common/tests/run_tests.adb", "common/main.adb");
 end Tushan;

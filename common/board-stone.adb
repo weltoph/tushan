@@ -119,7 +119,7 @@ package body Board.Stone is
  end Stone_From_Borders;
 
   function Fits (Stone: In Stone_T;
-    Board: In Out Board_T;
+    Board: In Board_T;
     Placement_X: X_Coordinate;
     Placement_Y: Y_Coordinate) return Boolean is
     Width: constant Positive := Get_Width (Stone);
