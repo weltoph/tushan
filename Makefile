@@ -1,8 +1,8 @@
-.PHONY: tests docs
+.PHONY: docs tests
+
+docs: tests
+	./inenv.sh gnatdoc -Ptushan --no-subprojects
 
 tests:
-	gprbuild -p -Ptushan
-	./bin/run_tests
-
-docs:
-	gnatdoc -Ptushan --no-subprojects
+	./inenv.sh gprbuild -p -Ptushan
+	./inenv.sh ./bin/run_tests

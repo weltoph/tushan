@@ -1,5 +1,4 @@
 package body Board is
-
   function New_Board return Board_T is
   begin
     return (others => (others => (Occupied => False)));
@@ -68,37 +67,5 @@ package body Board is
   begin
     return Board(X, Y).Occupied;
   end Is_Occupied;
-
-  function Contains (Set: In Coordinate_Set_T;
-                     X: In X_Coordinate;
-                     Y: In Y_Coordinate) return Boolean is
-  begin
-    return Set (X, Y);
-  end Contains;
-
-  function Empty (Set: In Coordinate_Set_T;
-                  X: In X_Coordinate;
-                  Y: In Y_Coordinate) return Boolean is
-  begin
-    for X in X_Coordinate loop
-      for Y in Y_Coordinate loop
-        if Set (X, Y) then
-          return False;
-        end if;
-      end loop;
-    end loop;
-    return True;
-  end Empty;
-
-  function Occupied_Places (Board: In Board_T) return Coordinate_Set_T is
-    Places: Coordinate_Set_T := (others => (others => False));
-  begin
-    for X in X_Coordinate loop
-      for Y in Y_Coordinate loop
-        Places (X, Y) := Is_Occupied (Board, X, Y);
-      end loop;
-    end loop;
-    return Places;
-  end Occupied_Places;
 
 end Board;

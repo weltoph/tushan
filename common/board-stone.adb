@@ -153,10 +153,12 @@ package body Board.Stone is
     return Stone'Length (2);
   end Get_Height;
 
-  function Connects (Stone: In Stone_T;
-                     Board: In Out Board_T;
-                     Placement_X: X_Coordinate;
-                     Placement_Y: Y_Coordinate) return Boolean is
+  procedure Connects (Stone: In Stone_T;
+                     Board: In Board_T;
+                     Placement_X: In X_Coordinate;
+                     Placement_Y: In Y_Coordinate;
+                     Consistent: Out Boolean;
+                     Increasing: Out Boolean) is
     Northern_Border: constant Border_T := Get_Border (Stone, North);
     Southern_Border: constant Border_T := Get_Border (Stone, South);
     Eastern_Border: constant Border_T := Get_Border (Stone, East);
@@ -164,6 +166,8 @@ package body Board.Stone is
     Width: constant Positive := Get_Width (Stone);
     Height: constant Positive := Get_Height (Stone);
   begin
+    Consistent := True;
+    Increasing := False;
     for X in 1 .. Width loop
       declare
         N: constant Inner_Connector_T := Northern_Border (X);
@@ -183,13 +187,19 @@ package body Board.Stone is
             with "Stone presents <Inner> as connector of a border.";
         end if;
         if N = Open and ON = Closed then
-          return False;
+          Consistent := False;
         elsif N = Closed and ON = Open then
-          return False;
+          Consistent := False;
         elsif S = Open and OS = Closed then
-          return False;
-        elsif S = Closed and OS = open then
-          return False;
+          Consistent := False;
+        elsif S = Closed and OS = Open then
+          Consistent := False;
+        end if;
+        if N = Open and ON = Open then
+          Increasing := True;
+        end if;
+        if S = Open and OS = Open then
+          Increasing := True;
         end if;
       end;
     end loop;
@@ -212,17 +222,22 @@ package body Board.Stone is
             with "Stone presents <Inner> as connector of a border.";
         end if;
         if E = Open and OE = Closed then
-          return False;
+          Consistent := False;
         elsif E = Closed and OE = Open then
-          return False;
+          Consistent := False;
         elsif W = Open and OW = Closed then
-          return False;
-        elsif W = Closed and OW = open then
-          return False;
+          Consistent := False;
+        elsif W = Closed and OW = Open then
+          Consistent := False;
+        end if;
+        if E = Open and OE = Open then
+          Increasing := True;
+        end if;
+        if W = Open and OW = Open then
+          Increasing := True;
         end if;
       end;
     end loop;
-    return True;
   end Connects;
 
 end Board.Stone;

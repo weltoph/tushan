@@ -239,7 +239,7 @@ package body Stone_Test is
       5 => (1 => True, 2 => True, 8 => True, 9 => True, others => False),
       others => (10 => False, others => True));
 
-    Connecting_Places: constant array (X_Coordinate, Y_Coordinate) of Boolean := (
+    Consistent_Places: constant array (X_Coordinate, Y_Coordinate) of Boolean := (
       1 => (1 => True, 2 => True, 5 => True, 8 => True, 9 => True, others => False),
       2 => (1 => True, 2 => True, 9 => True, others => False),
       3 => (1 => True, 9 => True, others => False),
@@ -247,6 +247,13 @@ package body Stone_Test is
       5 => (1 => True, 2 => True, 8 => True, 9 => True, others => False),
       6 => (1 => True, 2 => True, 4 => True, 7 => True, 8 => True, 9 => True, others => False),
       others => (10 => False, others => True));
+
+    Increasing_Places: constant array (X_Coordinate, Y_Coordinate) of Boolean := (
+      1 => (4 => True, 5 => True, others => False),
+      4 => (8 => True, others => False),
+      5 => (8 => True, others => False),
+      6 => (4 => True, 7 => True, others => False),
+      others => (others => False));
   begin
     Place (Placed_Stone, Board, Placement_X, Placement_Y);
 
@@ -256,15 +263,30 @@ package body Stone_Test is
           AUnit.Assertions.Assert (Fits (Stone, Board, X, Y),
                                    "Checking fitting placement at <"
                                    & X'Image & "," & Y'Image & ">");
-          if Connecting_Places (X, Y) then
-            AUnit.Assertions.Assert (Connects (Stone, Board, X, Y),
-                                   "Checking connecting placement at <"
-                                   & X'Image & "," & Y'Image & ">");
-          else
-            AUnit.Assertions.Assert (Not Connects (Stone, Board, X, Y),
-                                   "Checking non-connecting placement at <"
-                                   & X'Image & "," & Y'Image & ">");
-          end if;
+          declare
+            Consistent: Boolean;
+            Increasing: Boolean;
+          begin
+            Connects (Stone, Board, X, Y, Consistent, Increasing);
+            if Consistent_Places (X, Y) then
+              AUnit.Assertions.Assert (Consistent,
+                                       "Checking connecting placement at <"
+                                       & X'Image & "," & Y'Image & ">");
+            else
+              AUnit.Assertions.Assert (Not Consistent,
+                                       "Checking non-connecting placement at <"
+                                       & X'Image & "," & Y'Image & ">");
+            end if;
+            if Increasing_Places (X, Y) then
+              AUnit.Assertions.Assert (Increasing,
+                                       "Checking increasing placement at <"
+                                       & X'Image & "," & Y'Image & ">");
+            else
+              AUnit.Assertions.Assert (Not Increasing,
+                                       "Checking non-increasing placement at <"
+                                       & X'Image & "," & Y'Image & ">");
+            end if;
+          end;
         else
           AUnit.Assertions.Assert (Not Fits (Stone, Board, X, Y),
                                    "Checking non-fitting placement at <"
