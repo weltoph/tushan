@@ -13,39 +13,51 @@ package Board.Stone is
   type Stone_T(<>) is private;
 
   -- Places a stone on a board such that the upper left element of the stone is
-  -- placed at (Placement_X, Placement_Y).
+  -- placed at placement.
   -- @param Stone The stone to be placed.
   -- @param Board The board the stone is placed on.
-  -- @param Placement_X The X coordinate of the upper left corner of the stone
-  --        on the board.
-  -- @param Placement_Y The Y coordinate of the upper left corner of the stone
-  --        on the board.
+  -- @param Placement The coordinates of the upper left corner of the stone
+  -- on the board.
   -- @exception Board.Board_Error raised if the stone would overlap with a
   -- previously placed stone; i.e., if
-  --   Fits(Stone, Board, Placement_X, Placement_Y) = False
+  --   Fits(Stone, Board, Placement) = False
   procedure Place (Stone: In Stone_T;
                    Board: In Out Board_T;
-                   Placement_X: X_Coordinate;
-                   Placement_Y: Y_Coordinate);
+                   Placement: In Point_T);
 
-  -- Checks whether a stone fits on a board at postition
-  -- (Placement_X, Placement_Y).
+  -- Returns a set of points that a stone would cover if put at point.
+  -- @param Stone The stone to use.
+  -- @param Point The point to put the upper left corner of the stone to return
+  -- the "shadow" it casts.
+  -- @return The set of points the stone would cover if places at the given
+  -- point.
+  -- @exception Board.Board_Error Thrown if the shadow of the stone lies
+  -- outside the board dimensions.
+  function Covers (Stone: In Stone_T; Point: In Point_T) return Point_Sets.Set;
+
+  -- Returns whether the stone put on this point fits the dimensions of the
+  -- board.
+  -- @param Stone The stone to use.
+  -- @param Point The point to put the upper left corner of the stone to return
+  -- whether it then fits the board.
+  -- @return Whether the stone when put at the point would fit into the
+  -- dimensions of the board.
+  function Fits_Dimensions (Stone: In Stone_T; Point: In Point_T) return Boolean;
+
+  -- Checks whether a stone fits on a board at postition Placement.
   -- @param Stone The stone to fit.
   -- @param Board The board to fit it on.
-  -- @param Placement_X The X coordinate of the upper left corner of the stone
-  --        on the board.
-  -- @param Placement_Y The Y coordinate of the upper left corner of the stone
-  --        on the board.
+  -- @param Placement The coordinate of the upper left corner of the stone
+  -- on the board.
   -- @return Whether stone can be placed on the board at the specified
   -- position.
   function Fits (Stone: In Stone_T;
                  Board: In Board_T;
-                 Placement_X: X_Coordinate;
-                 Placement_Y: Y_Coordinate)
+                 Placement: In Point_T)
                  return Boolean;
 
   -- Checks whether a stone connects to the other stones on the board if placed
-  -- at postition (Placement_X, Placement_Y). That is, open connectors only
+  -- at postition Placement. That is, open connectors only
   -- connect to either open, empty, or outer connectors, and closed connectors
   -- connect only to closed, empty, or outer connectors. The procedure returns
   -- two values; that is, Consistent and Increasing. Consistent is set to true
@@ -53,9 +65,7 @@ package Board.Stone is
   -- the stone connects at least one one open connector to another one.
   -- @param Stone The stone to check the connections for.
   -- @param Board The board to check the connections at.
-  -- @param Placement_X The X coordinate of the upper left corner of the stone
-  -- on the board.
-  -- @param Placement_Y The Y coordinate of the upper left corner of the stone
+  -- @param Placement The coordinates of the upper left corner of the stone
   -- on the board.
   -- @param Consistent Indicates whether the connectors of the stone fit with
   -- the already placed stones on the board.
@@ -69,8 +79,7 @@ package Board.Stone is
   -- be put precisely on another stone that is already placed.
   procedure Connects (Stone: In Stone_T;
                      Board: In Board_T;
-                     Placement_X: In X_Coordinate;
-                     Placement_Y: In Y_Coordinate;
+                     Placement: In Point_T;
                      Consistent: Out Boolean;
                      Increasing: Out Boolean);
 

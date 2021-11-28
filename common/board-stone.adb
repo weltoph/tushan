@@ -1,14 +1,13 @@
 package body Board.Stone is
   procedure Place (Stone: In Stone_T;
                    Board: In Out Board_T;
-                   Placement_X: X_Coordinate;
-                   Placement_Y: Y_Coordinate) is
+                   Placement: In Point_T) is
   begin
     for X in 1 .. Stone'Length (1) loop
       for Y in 1 .. Stone'Length (2) loop
         declare
-          Current_X: constant X_Coordinate := Placement_X + X - 1;
-          Current_Y: constant Y_Coordinate := Placement_Y + Y - 1;
+          Current_X: constant X_Coordinate := Placement.X + X - 1;
+          Current_Y: constant Y_Coordinate := Placement.Y + Y - 1;
         begin
           case Board(Current_X, Current_Y).Occupied is
             when True =>
@@ -21,6 +20,29 @@ package body Board.Stone is
       end loop;
     end loop;
   end Place;
+
+  function Fits_Dimensions (Stone: In Stone_T; Point: In Point_T) return Boolean is
+    Max_Width: constant X_Coordinate := Width - Point.X + 1;
+    Max_Height: constant Y_Coordinate := Height - Point.Y + 1;
+  begin
+    return Get_Width (Stone) <= Max_Width and Get_Height (Stone) <= Max_Height;
+  end;
+
+  function Covers (Stone: In Stone_T; Point: In Point_T) return Point_Sets.Set is
+    Result: Point_Sets.Set;
+  begin
+    if not Fits_Dimensions (Stone, Point) then
+      raise Board_Error with "Shadow of stone lies outside the dimensions of the board.";
+    end if;
+
+    for X in Point.X .. Point.X + Get_Width (Stone) - 1 loop
+      for Y in Point.Y .. Point.Y + Get_Height (Stone) - 1 loop
+        Point_Sets.Include (Result, (X, Y));
+      end loop;
+    end loop;
+
+    return Result;
+  end Covers;
 
   function Get_Border (Stone: In Stone_T; Direction: In Direction_T)
     return Border_T is
@@ -120,25 +142,20 @@ package body Board.Stone is
 
   function Fits (Stone: In Stone_T;
     Board: In Board_T;
-    Placement_X: X_Coordinate;
-    Placement_Y: Y_Coordinate) return Boolean is
-    Width: constant Positive := Get_Width (Stone);
-    Height: constant Positive := Get_Height (Stone);
+    Placement: In Point_T) return Boolean is
 
-    Max_Width: constant X_Coordinate := Board'Length (1) - Placement_X + 1;
-    Max_Height: constant Y_Coordinate := Board'Length (2) - Placement_Y + 1;
+    Max_Width: constant X_Coordinate := Width - Placement.X + 1;
+    Max_Height: constant Y_Coordinate := Height - Placement.Y + 1;
   begin
     -- check out of bounds
-    if Width > Max_Width or Height > Max_Height then
+    if not Fits_Dimensions (Stone, Placement) then
       return False;
     end if;
     -- check that all places on the board are not yet occupied
-    for X in Placement_X .. Placement_X + Width - 1 loop
-      for Y in Placement_Y .. Placement_Y + Height - 1 loop
-        if Board(X, Y).Occupied then
-          return False;
-        end if;
-      end loop;
+    for P of Covers (Stone, Placement) loop
+      if Board(P.X, P.Y).Occupied then
+        return False;
+      end if;
     end loop;
     return True;
   end Fits;
@@ -155,8 +172,7 @@ package body Board.Stone is
 
   procedure Connects (Stone: In Stone_T;
                      Board: In Board_T;
-                     Placement_X: In X_Coordinate;
-                     Placement_Y: In Y_Coordinate;
+                     Placement: In Point_T;
                      Consistent: Out Boolean;
                      Increasing: Out Boolean) is
     Northern_Border: constant Border_T := Get_Border (Stone, North);
@@ -172,13 +188,11 @@ package body Board.Stone is
       declare
         N: constant Inner_Connector_T := Northern_Border (X);
         ON: constant Connector_T := Get_Opposing_Connector (Board,
-                                                            Placement_X + X - 1,
-                                                            Placement_Y,
+                                                            (Placement.X + X - 1, Placement.Y),
                                                             North);
         S: constant Inner_Connector_T := Southern_Border (X);
         OS: constant Connector_T := Get_Opposing_Connector (Board,
-                                                            Width + Placement_X - X,
-                                                            Placement_Y + Height- 1,
+                                                            (Width + Placement.X - X, Placement.Y + Height- 1),
                                                             South);
       begin
         if N = Inner or ON = Inner or S = Inner or OS = Inner then
@@ -207,13 +221,11 @@ package body Board.Stone is
       declare
         E: constant Inner_Connector_T := Eastern_Border (Y);
         OE: constant Connector_T := Get_Opposing_Connector (Board,
-                                                            Placement_X + Width - 1,
-                                                            Placement_Y + Y - 1,
+                                                            (Placement.X + Width - 1, Placement.Y + Y - 1),
                                                             East);
         W: constant Inner_Connector_T := Western_Border (Y);
         OW: constant Connector_T := Get_Opposing_Connector (Board,
-                                                            Placement_X,
-                                                            Placement_Y + Height - Y,
+                                                            (Placement.X, Placement.Y + Height - Y),
                                                             West);
       begin
         if E = Inner or OE = Inner or W = Inner or OW = Inner then

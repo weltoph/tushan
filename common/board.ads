@@ -1,3 +1,4 @@
+with Ada.Containers.Ordered_Sets;
 -- @summary Representation of the current board state.
 --
 -- @description This package mainly provides the type
@@ -14,6 +15,20 @@ package Board is
 
   subtype X_Coordinate is Positive range 1 .. Width;
   subtype Y_Coordinate is Positive range 1 .. Height;
+
+  type Point_T is
+    record
+      X: X_Coordinate;
+      Y: Y_Coordinate;
+    end record;
+
+  function "<" (P1, P2: In Point_T) return Boolean;
+
+  package Point_Sets is new Ada.Containers.Ordered_Sets(
+    Element_Type => Point_T,
+    "<" => "<",
+    "=" => "=");
+
 
   -- We consider a board to be a discrete two-dimensional space of squares.
   -- Hence, there is a natural concept of directions which is captured by this
@@ -43,42 +58,34 @@ package Board is
   -- Get_Connector returns which logical connector type occurs for some square
   -- in some direction.
   -- @param Board The board to check the connector for.
-  -- @param X The X coordinate of the square to check.
-  -- @param Y The Y coordinate of the square to check.
+  -- @param Point The coordinates of the square to check.
   -- @param Direction The direction in which the square is checked.
   -- @return The connector type that is at field (X, Y) in direction Direction
   -- on Board.
   function Get_Connector (Board: In Board_T;
-                          X: In X_Coordinate;
-                          Y: In Y_Coordinate;
+                          Point: In Point_T;
                           Direction: In Direction_T)
                           return Connector_T;
 
   -- Get_Opposing_Connector returns which logical connector type occurs on the
   -- other side of some square in some direction.
   -- @param Board The board to check the connector for.
-  -- @param X The X coordinate of the square to check.
-  -- @param Y The Y coordinate of the square to check.
+  -- @param Point The coordinates of the square to check.
   -- @param Direction The direction in which the square is checked.
   -- @return The connector type that is opposite of field (X, Y) in direction
   -- Direction on Board. For example,
   --   Get_Opposing_Connector(board, x, y, North) = Get_Connector(board, x-1, y, South)
   -- For appropiate board, x, and y.
   function Get_Opposing_Connector (Board: In Board_T;
-                                   X: In X_Coordinate;
-                                   Y: In Y_Coordinate;
+                                   Point: In Point_T;
                                    Direction: In Direction_T)
                                    return Connector_T;
 
   -- Checks whether the square at some position is already occupied.
   -- @param Board The board to inspect the position in.
-  -- @param X The X coordinate of the position to check.
-  -- @param Y The Y coordinate of the position to check.
+  -- @param Point The coordinates of the position to check.
   -- @return Returns whether that square already is occupied by some stone.
-  function Is_Occupied (Board: In Board_T;
-                        X: In X_Coordinate;
-                        Y: In Y_Coordinate)
-                        return Boolean;
+  function Is_Occupied (Board: In Board_T; Point: In Point_T) return Boolean;
 
   Board_Error: exception;
 
@@ -95,7 +102,5 @@ package Board is
     end record;
 
   type Board_T is array (X_Coordinate, Y_Coordinate) of Board_Field_T;
-
-  type Coordinate_Set_T is array (X_Coordinate, Y_Coordinate) of Boolean;
 
 end Board;

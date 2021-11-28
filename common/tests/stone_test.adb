@@ -44,16 +44,16 @@ package body Stone_Test is
     AUnit.Assertions.Assert (Stone_10.Get_Height (Test_Stone) = 2,
                              "Checking height of stone");
 
-    Stone_10.Place (Test_Stone, Test_Board, 4, 4);
+    Stone_10.Place (Test_Stone, Test_Board, (4, 4));
 
     for X in Occupied_Places'Range (1) loop
       for Y in Occupied_Places'Range (2) loop
         if Occupied_Places (X, Y) then
-          AUnit.Assertions.Assert (Board_10.Is_Occupied (Test_Board, X, Y),
+          AUnit.Assertions.Assert (Board_10.Is_Occupied (Test_Board, (X, Y)),
                                    "Checking occupied Field <"
                                    & X'Image & "," & Y'Image & ">");
         else
-          AUnit.Assertions.Assert (Not Board_10.Is_Occupied (Test_Board, X, Y),
+          AUnit.Assertions.Assert (Not Board_10.Is_Occupied (Test_Board, (X, Y)),
                                    "Checking unoccupied Field <"
                                    & X'Image & "," & Y'Image & ">");
         end if;
@@ -61,107 +61,107 @@ package body Stone_Test is
     end loop;
 
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     4, 4, North) = Open,
+                                                     (4, 4), North) = Open,
                              "Checking Connector <4, 4, North>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     4, 4, East) = Inner,
+                                                     (4, 4), East) = Inner,
                              "Checking Connector <4, 4, East>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     4, 4, South) = Inner,
+                                                     (4, 4), South) = Inner,
                              "Checking Connector <4, 4, South>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     4, 4, West) = Open,
+                                                     (4, 4), West) = Open,
                              "Checking Connector <4, 4, West>");
 
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     5, 4, North) = Closed,
+                                                     (5, 4), North) = Closed,
                              "Checking Connector <5, 4, North>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     5, 4, East) = Inner,
+                                                     (5, 4), East) = Inner,
                              "Checking Connector <5, 4, East>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     5, 4, South) = Inner,
+                                                     (5, 4), South) = Inner,
                              "Checking Connector <5, 4, South>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     5, 4, West) = Inner,
+                                                     (5, 4), West) = Inner,
                              "Checking Connector <5, 4, West>");
 
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     6, 4, North) = Closed,
+                                                     (6, 4), North) = Closed,
                              "Checking Connector <6, 4, North>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     6, 4, East) = Inner,
+                                                     (6, 4), East) = Inner,
                              "Checking Connector <6, 4, East>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     6, 4, South) = Inner,
+                                                     (6, 4), South) = Inner,
                              "Checking Connector <6, 4, South>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     6, 4, West) = Inner,
+                                                     (6, 4), West) = Inner,
                              "Checking Connector <6, 4, West>");
 
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     7, 4, North) = Closed,
+                                                     (7, 4), North) = Closed,
                              "Checking Connector <7, 4, North>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     7, 4, East) = Closed,
+                                                     (7, 4), East) = Closed,
                              "Checking Connector <7, 4, East>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     7, 4, South) = Inner,
+                                                     (7, 4), South) = Inner,
                              "Checking Connector <7, 4, South>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     7, 4, West) = Inner,
+                                                     (7, 4), West) = Inner,
                              "Checking Connector <7, 4, West>");
 
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     4, 5, North) = Inner,
+                                                     (4, 5), North) = Inner,
                              "Checking Connector <4, 5, North>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     4, 5, East) = Inner,
+                                                     (4, 5), East) = Inner,
                              "Checking Connector <4, 5, East>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     4, 5, South) = Closed,
+                                                     (4, 5), South) = Closed,
                              "Checking Connector <4, 5, South>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     4, 5, West) = Closed,
+                                                     (4, 5), West) = Closed,
                              "Checking Connector <4, 5, West>");
 
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     5, 5, North) = Inner,
+                                                     (5, 5), North) = Inner,
                              "Checking Connector <5, 5, North>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     5, 5, East) = Inner,
+                                                     (5, 5), East) = Inner,
                              "Checking Connector <5, 5, East>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     5, 5, South) = Open,
+                                                     (5, 5), South) = Open,
                              "Checking Connector <5, 5, South>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     5, 5, West) = Inner,
+                                                     (5, 5), West) = Inner,
                              "Checking Connector <5, 5, West>");
 
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     6, 5, North) = Inner,
+                                                     (6, 5), North) = Inner,
                              "Checking Connector <6, 5, North>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     6, 5, East) = Inner,
+                                                     (6, 5), East) = Inner,
                              "Checking Connector <6, 5, East>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     6, 5, South) = Closed,
+                                                     (6, 5), South) = Closed,
                              "Checking Connector <6, 5, South>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     6, 5, West) = Inner,
+                                                     (6, 5), West) = Inner,
                              "Checking Connector <6, 5, West>");
 
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     7, 5, North) = Inner,
+                                                     (7, 5), North) = Inner,
                              "Checking Connector <7, 5, North>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     7, 5, East) = Open,
+                                                     (7, 5), East) = Open,
                              "Checking Connector <7, 5, East>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     7, 5, South) = Closed,
+                                                     (7, 5), South) = Closed,
                              "Checking Connector <7, 5, South>");
     AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-                                                     7, 5, West) = Inner,
+                                                     (7, 5), West) = Inner,
                              "Checking Connector <7, 5, West>");
   end Test_Place;
 
@@ -255,19 +255,19 @@ package body Stone_Test is
       6 => (4 => True, 7 => True, others => False),
       others => (others => False));
   begin
-    Place (Placed_Stone, Board, Placement_X, Placement_Y);
+    Place (Placed_Stone, Board, (Placement_X, Placement_Y));
 
     for X in X_Coordinate loop
       for Y in Y_Coordinate loop
         if Fitting_Places (X, Y) then
-          AUnit.Assertions.Assert (Fits (Stone, Board, X, Y),
+          AUnit.Assertions.Assert (Fits (Stone, Board, (X, Y)),
                                    "Checking fitting placement at <"
                                    & X'Image & "," & Y'Image & ">");
           declare
             Consistent: Boolean;
             Increasing: Boolean;
           begin
-            Connects (Stone, Board, X, Y, Consistent, Increasing);
+            Connects (Stone, Board, (X, Y), Consistent, Increasing);
             if Consistent_Places (X, Y) then
               AUnit.Assertions.Assert (Consistent,
                                        "Checking connecting placement at <"
@@ -288,7 +288,7 @@ package body Stone_Test is
             end if;
           end;
         else
-          AUnit.Assertions.Assert (Not Fits (Stone, Board, X, Y),
+          AUnit.Assertions.Assert (Not Fits (Stone, Board, (X, Y)),
                                    "Checking non-fitting placement at <"
                                    & X'Image & "," & Y'Image & ">");
         end if;
