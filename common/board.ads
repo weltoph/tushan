@@ -1,14 +1,18 @@
 with Ada.Containers.Ordered_Sets;
--- @summary Representation of the current board state.
+-- @summary Representation of the current game state.
 --
 -- @description This package mainly provides the type
 --   Board_T
--- which encapsulates the current state of the board. It is generic in the
--- width and height of the board.
+--   Game_T
+-- which encapsulates the current state of the board and the game respectively.
+-- It is generic in the width and height of the board.
 generic
   Width: Positive;
   Height: Positive;
 package Board is
+  -- The representation of a game.
+  --type Game_T is private;
+
   -- The central representation of a board. Logically, one can think of a board
   -- as a two dimensional space of squares.
   type Board_T is private;
