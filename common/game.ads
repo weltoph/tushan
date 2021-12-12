@@ -1,6 +1,4 @@
 with Board;
-with Board.Stone;
-
 
 -- @summary Package which mainly encapsulates the type
 --   Game_T
@@ -14,7 +12,6 @@ with Board.Stone;
 -- cannot change anymore.
 generic
   with package Game_Board is new Board(<>);
-  with package Stone is new Game_Board.Stone;
 package Game is
   type Game_T is private;
 
