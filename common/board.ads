@@ -72,6 +72,7 @@ package Board is
   subtype Inner_Connector_T is Connector_T range Closed .. Inner;
   subtype Border_Connector_T is Inner_Connector_T range Closed .. Open;
 
+  type Field_T is array (Direction_T) of Inner_Connector_T;
 
   type Border_T is array (Positive range <>) of Border_Connector_T;
 
@@ -175,8 +176,6 @@ package Board is
                               Western_Border: Border_T)
                               return Stone_T;
 
-
-
   -- Get_Connector returns which logical connector type occurs for some square
   -- in some direction.
   -- @param Board The board to check the connector for.
@@ -217,8 +216,6 @@ package Board is
   Board_Error: exception;
 
   private
-
-  type Field_T is array (Direction_T) of Inner_Connector_T;
 
   type Board_Field_T (Occupied: Boolean := False) is
     record

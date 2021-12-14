@@ -1,0 +1,4 @@
+[submodule "lib/Curses"]
+	path = lib/Curses
+  url = git@github.com:annexi-strayline/Curses.git
+  ignore = untracked

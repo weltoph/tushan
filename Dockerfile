@@ -11,6 +11,7 @@ RUN set -xe \
                libaunit18 \
                libaunit18-dev \
                gnat-gps \
+               libncurses-dev \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get purge --auto-remove \
     && apt-get clean

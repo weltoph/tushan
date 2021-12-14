@@ -1,0 +1,10 @@
+with Board;
+with Ada.Wide_Characters;
+
+generic
+  with package Game_Board is new Board(<>);
+package Display is
+  type Board_Display_T is array (1 .. Game_Board.Width*5, 1 .. Game_Board.Height*5) of Wide_Character;
+
+  function Display(Display_Board: Game_Board.Board_T) return Board_Display_T;
+end Display;

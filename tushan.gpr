@@ -1,4 +1,5 @@
 with "/usr/share/gpr/aunit.gpr";
+with "lib/Curses/libnadacurses.gpr";
 
 project Tushan is
   for Source_Dirs use ("common/**");
