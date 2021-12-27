@@ -10,9 +10,6 @@ generic
   Width: Positive;
   Height: Positive;
 package Board is
-  -- The representation of a game.
-  --type Game_T is private;
-
   -- The central representation of a board. Logically, one can think of a board
   -- as a two dimensional space of squares.
   type Board_T is private;
