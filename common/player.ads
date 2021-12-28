@@ -18,6 +18,17 @@ package Player is
                      Final_Board: In Game_Board.Board_T;
                      Score: In Natural) is abstract;
 
+  protected type Player_T(Player: Player_Acc) is
+    procedure Next_Move(Board: In Game_Board.Board_T;
+                    Stone: In Out Game_Board.Stone_T;
+                    Placement: Out Game_Board.Point_T);
+    procedure Disqualify;
+    procedure End_Game(Final_Board: In Game_Board.Board_T;
+                   Score: In Natural);
+  private
+    Inner: Player_Acc;
+  end Player_T;
+
   type Random_Player is new Player_Interface with null record;
 
   procedure Next_Move(Player: In Random_Player;

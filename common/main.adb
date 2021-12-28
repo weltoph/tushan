@@ -11,14 +11,17 @@ procedure Main is
   package Player_10 is new Player(Board_10);
   package Game_10 is new Game(Player_10);
 
-  NSPlayer: Player_10.Random_Player;
-  WEPlayer: Player_10.Random_Player;
+  NSPlayer: Player_10.Player_T(new Player_10.Random_Player);
+  WEPlayer: Player_10.Player_T(new Player_10.Random_Player);
+
+  Final_Board: Board_10.Board_T;
 
   Play: Game_10.Play_T;
 begin
-  Play.Init(new Player_10.Random_Player, new Player_10.Random_Player);
+  Play.Init(NSPlayer, WEPlayer);
+  Play.Play(Final_Board);
   declare
-    Chars: constant Display_10.Board_Display_T := Display_10.Display(Play.Play);
+    Chars: constant Display_10.Board_Display_T := Display_10.Display(Final_Board);
   begin
     for Y in Chars'Range(2) loop
       for X in Chars'Range(1) loop
