@@ -39,6 +39,8 @@ package Board is
     "<" => "<",
     "=" => "=");
 
+  function Middle return Point_Sets.Set;
+
   type Connective_T is
     record
       Point: Point_T;
@@ -74,6 +76,10 @@ package Board is
   type Border_T is array (Positive range <>) of Border_Connector_T;
 
   type Stone_T(<>) is private;
+
+
+  function Valid_Moves(Board: In Board_T; Stone: In Stone_T)
+    return Point_Sets.Set;
 
   -- Places a stone on a board such that the upper left element of the stone is
   -- placed at placement.
@@ -178,7 +184,7 @@ package Board is
   -- @param Board The board to check the connector for.
   -- @param Point The coordinates of the square to check.
   -- @param Direction The direction in which the square is checked.
-  -- @return The connector type that is at field (X, Y) in direction Direction
+  -- @return The connector type khat is at field (X, Y) in direction Direction
   -- on Board.
   function Get_Connector (Board: In Board_T;
                           Point: In Point_T;

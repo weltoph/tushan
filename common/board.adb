@@ -16,6 +16,78 @@ package body Board is
     end if;
   end "<";
 
+  function Middle return Point_Sets.Set
+  is
+    Min_X: constant X_Coordinate :=
+      (if Width mod 2 = 0
+       then Width / 2
+       else (Width + 1) / 2);
+    Max_X: constant X_Coordinate :=
+      (if Width mod 2 = 0
+       then (Width / 2) + 1
+       else (Width + 1) / 2);
+    Min_Y: constant Y_Coordinate :=
+      (if Height mod 2 = 0
+       then Height / 2
+       else (Height + 1) / 2);
+    Max_Y: constant Y_Coordinate :=
+      (if Height mod 2 = 0
+       then (Height / 2) + 1
+       else (Height + 1) / 2);
+    Result: Point_Sets.Set;
+  begin
+    for X in Min_X .. Max_X loop
+      for Y in Min_Y .. Max_Y loop
+        Result.Insert((X, Y));
+      end loop;
+    end loop;
+    return Result;
+  end Middle;
+
+  function Valid_Moves(Board: In Board_T;
+                       Stone: In Stone_T)
+    return Point_Sets.Set
+  is
+    Result: Point_Sets.Set;
+    Occupied: constant Point_Sets.Set := Occupied_Points(Board);
+    Middle_Points: constant Point_Sets.Set := Middle;
+
+    procedure Handle(Current: In Point_T)
+    is
+      Fits: constant Boolean := Fits_Dimensions(Stone, Current);
+      Cover: constant Point_Sets.Set := Covers(Stone, Current);
+    begin
+      if not Fits then return; end if;
+      if Occupied.Is_Empty then
+        if Middle_Points.Intersection(Cover).Is_Empty then return; end if;
+        Result.Insert(Current);
+      else
+        if not Occupied.Intersection(Cover).Is_Empty then return; end if;
+        declare
+          Consistent: Connective_Sets.Set;
+          Increasing: Connective_Sets.Set;
+          Everything: constant Connective_Sets.Set := Connectives(Stone, Current);
+        begin
+          Connects(Board, Stone, Current, Consistent, Increasing);
+          if not Connective_Sets.Equivalent_Sets(Consistent, Everything) then return; end if;
+          if Increasing.Is_Empty then return; end if;
+          Result.Insert(Current);
+        end;
+      end if;
+    end Handle;
+  begin
+    for X in X_Coordinate loop
+      for Y in Y_Coordinate loop
+        declare
+          Current: constant Point_T := (X, Y);
+        begin
+          Handle(Current);
+        end;
+      end loop;
+    end loop;
+    return Result;
+  end Valid_Moves;
+
   function "<" (C1, C2: In Connective_T) return Boolean is
     function Dir_Val (Dir: In Direction_T) return Natural is
     begin

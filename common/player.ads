@@ -1,11 +1,14 @@
 with Board;
+with Ada.Numerics.Discrete_Random;
 
 generic
   with package Game_Board is new Board(<>);
 package Player is
-  type Player_Interface is abstract tagged null record;
+  type Player_Interface is abstract tagged limited null record;
 
   type Player_Acc is access all Player_Interface'Class;
+
+  Player_Error: exception;
 
   procedure Next_Move(Player: In Player_Interface;
                       Board: In Game_Board.Board_T;
@@ -29,7 +32,12 @@ package Player is
     Inner: Player_Acc;
   end Player_T;
 
-  type Random_Player is new Player_Interface with null record;
+  package Rnd_Int is new Ada.Numerics.Discrete_Random(Integer);
+
+  type Random_Player is new Player_Interface with
+    record
+      Rnd: Rnd_Int.Generator;
+    end record;
 
   procedure Next_Move(Player: In Random_Player;
                       Board: In Game_Board.Board_T;

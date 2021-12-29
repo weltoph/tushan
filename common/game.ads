@@ -10,9 +10,4 @@ package Game is
     entry Play(Final_Board: Out Players.Game_Board.Board_T);
   end Play_T;
 
-  function Valid_Moves(Board: In Players.Game_Board.Board_T;
-                       Stone: In Players.Game_Board.Stone_T)
-    return Players.Game_Board.Point_Sets.Set;
-
-
 end Game;
