@@ -6,7 +6,7 @@ generic
 package Player is
   type Player_Interface is abstract tagged limited null record;
 
-  type Player_Acc is access all Player_Interface'Class;
+  type Player_Acc is access Player_Interface'Class;
 
   Player_Error: exception;
 
@@ -21,16 +21,18 @@ package Player is
                      Final_Board: In Game_Board.Board_T;
                      Score: In Natural) is abstract;
 
-  protected type Player_T(Player: Player_Acc) is
-    procedure Next_Move(Board: In Game_Board.Board_T;
-                    Stone: In Out Game_Board.Stone_T;
-                    Placement: Out Game_Board.Point_T);
-    procedure Disqualify;
-    procedure End_Game(Final_Board: In Game_Board.Board_T;
-                   Score: In Natural);
+  type Player_Type_T is (Random);
+
+  type Player_Info(Player_Type: Player_Type_T := Random) is
+    record
+      case Player_Type is
+        when Random => null;
+      end case;
+    end record;
+
+  function Construct_Player(Info: In Player_Info) return Player_Acc;
+
   private
-    Inner: Player_Acc;
-  end Player_T;
 
   package Rnd_Int is new Ada.Numerics.Discrete_Random(Integer);
 

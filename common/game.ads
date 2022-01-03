@@ -5,8 +5,8 @@ generic
 package Game is
 
   task type Play_T is
-    entry Init(NSPlayer: In Players.Player_T;
-               WEPlayer: In Players.Player_T);
+    entry Init(NSPlayer: In Players.Player_Info;
+               WEPlayer: In Players.Player_Info);
     entry Play(Final_Board: Out Players.Game_Board.Board_T);
   end Play_T;
 

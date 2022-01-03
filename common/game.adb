@@ -3,13 +3,13 @@ with Player;
 package body Game is
 
   task body Play_T is
-    NS: Players.Player_T;
-    WE: Players.Player_T;
+    NS_Info: Players.Player_Info;
+    WE_Info: Players.Player_Info;
 
     type Token_T is (NSP, WEP);
     Token: Token_T := NSP;
 
-    function Current_Player return Players.Player_T
+    function Current_Player return Players.Player_
     is
     begin
       if Token = NSP then
@@ -34,14 +34,17 @@ package body Game is
     begin
       return (SMoves.Is_Empty and RSMoves.Is_Empty and RRSMoves.Is_Empty and RRRSMoves.Is_Empty);
     end Is_Over;
+
   begin
-    accept Init(NSPlayer: In Players.Player_T; WEPlayer: In Players.Player_T) do
-      NS := NSPlayer;
-      WE := WEPlayer;
+    accept Init(NSPlayer: In Players.Player_Info; WEPlayer: In Players.Player_Info) do
+      NS_Info := NSPlayer;
+      WE_Info := WEPlayer;
     end Init;
 
     declare
       Current_Board: Players.Game_Board.Board_T := Players.Game_Board.New_Board;
+      NSPlayer: Players.Player_Acc := Players.Construct_Player(NS_Info);
+      WEPlayer: Players.Player_Acc := Players.Construct_Player(WE_Info);
     begin
       loop
         declare
