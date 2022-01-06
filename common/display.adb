@@ -1,7 +1,20 @@
 with Ada.Text_IO;
+with Ada.Wide_Text_IO;
 package body Display is
 
   pragma Wide_Character_Encoding(UTF8);
+
+  procedure Print_Display(Input: In Game_Board.Board_T)
+  is
+    Board: constant Board_Display_T := Display(Input);
+  begin
+    for Y in Board'Range(2) loop
+      for X in Board'Range(1) loop
+        Ada.Wide_Text_IO.Put(Board(X, Y));
+      end loop;
+      Ada.Wide_Text_IO.Put_Line("");
+    end loop;
+  end Print_Display;
 
   function Display(Display_Board: Game_Board.Board_T) return Board_Display_T is
     Result: Board_Display_T := (others => (others => (' ')));

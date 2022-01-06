@@ -1,3 +1,4 @@
+with Ada.Text_IO;
 package body Board is
 
   function Valid_Moves(Board: In Board_T; Stone: In Stone_T) return Moves_T
@@ -48,6 +49,7 @@ package body Board is
     RRStone: constant Stone_T := Rotate(RStone);
     RRRStone: constant Stone_T := Rotate(RRStone);
   begin
+    Ada.Text_IO.Put_Line("Generating valid moves.");
     return (
       0 => Valid_Moves_For_Rotation(Stone),
       1 => Valid_Moves_For_Rotation(RStone),
