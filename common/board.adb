@@ -1,5 +1,60 @@
 package body Board is
 
+  function Valid_Moves(Board: In Board_T; Stone: In Stone_T) return Moves_T
+  is
+    function Valid_Moves_For_Rotation(Stone: In Stone_T)
+      return Point_Sets.Set
+    is
+      Result: Point_Sets.Set;
+      Occupied: constant Point_Sets.Set := Occupied_Points(Board);
+      Middle_Points: constant Point_Sets.Set := Middle;
+
+      procedure Handle(Current: In Point_T)
+      is
+        Fits: constant Boolean := Fits_Dimensions(Stone, Current);
+        Cover: constant Point_Sets.Set := Covers(Stone, Current);
+      begin
+        if not Fits then return; end if;
+        if Occupied.Is_Empty then
+          if Middle_Points.Intersection(Cover).Is_Empty then return; end if;
+          Result.Insert(Current);
+        else
+          if not Occupied.Intersection(Cover).Is_Empty then return; end if;
+          declare
+            Consistent: Connective_Sets.Set;
+            Increasing: Connective_Sets.Set;
+            Everything: constant Connective_Sets.Set := Connectives(Stone, Current);
+          begin
+            Connects(Board, Stone, Current, Consistent, Increasing);
+            if not Connective_Sets.Equivalent_Sets(Consistent, Everything) then return; end if;
+            if Increasing.Is_Empty then return; end if;
+            Result.Insert(Current);
+          end;
+        end if;
+      end Handle;
+    begin
+      for X in X_Coordinate loop
+        for Y in Y_Coordinate loop
+          declare
+            Current: constant Point_T := (X, Y);
+          begin
+            Handle(Current);
+          end;
+        end loop;
+      end loop;
+      return Result;
+    end Valid_Moves_For_Rotation;
+    RStone: constant Stone_T := Rotate(Stone);
+    RRStone: constant Stone_T := Rotate(RStone);
+    RRRStone: constant Stone_T := Rotate(RRStone);
+  begin
+    return (
+      0 => Valid_Moves_For_Rotation(Stone),
+      1 => Valid_Moves_For_Rotation(RStone),
+      2 => Valid_Moves_For_Rotation(RRStone),
+      3 => Valid_Moves_For_Rotation(RRRStone));
+  end Valid_Moves;
+
   function New_Board return Board_T is
   begin
     return (others => (others => (Occupied => False)));
@@ -43,50 +98,6 @@ package body Board is
     end loop;
     return Result;
   end Middle;
-
-  function Valid_Moves(Board: In Board_T;
-                       Stone: In Stone_T)
-    return Point_Sets.Set
-  is
-    Result: Point_Sets.Set;
-    Occupied: constant Point_Sets.Set := Occupied_Points(Board);
-    Middle_Points: constant Point_Sets.Set := Middle;
-
-    procedure Handle(Current: In Point_T)
-    is
-      Fits: constant Boolean := Fits_Dimensions(Stone, Current);
-      Cover: constant Point_Sets.Set := Covers(Stone, Current);
-    begin
-      if not Fits then return; end if;
-      if Occupied.Is_Empty then
-        if Middle_Points.Intersection(Cover).Is_Empty then return; end if;
-        Result.Insert(Current);
-      else
-        if not Occupied.Intersection(Cover).Is_Empty then return; end if;
-        declare
-          Consistent: Connective_Sets.Set;
-          Increasing: Connective_Sets.Set;
-          Everything: constant Connective_Sets.Set := Connectives(Stone, Current);
-        begin
-          Connects(Board, Stone, Current, Consistent, Increasing);
-          if not Connective_Sets.Equivalent_Sets(Consistent, Everything) then return; end if;
-          if Increasing.Is_Empty then return; end if;
-          Result.Insert(Current);
-        end;
-      end if;
-    end Handle;
-  begin
-    for X in X_Coordinate loop
-      for Y in Y_Coordinate loop
-        declare
-          Current: constant Point_T := (X, Y);
-        begin
-          Handle(Current);
-        end;
-      end loop;
-    end loop;
-    return Result;
-  end Valid_Moves;
 
   function "<" (C1, C2: In Connective_T) return Boolean is
     function Dir_Val (Dir: In Direction_T) return Natural is

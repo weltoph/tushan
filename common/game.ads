@@ -1,13 +1,12 @@
+with Board;
 with Player;
 
 generic
-  with package Players is new Player(<>);
+  with package Game_Board is new Board(<>);
 package Game is
+  package Players is new Player(Game_Board);
 
-  task type Play_T is
-    entry Init(NSPlayer: In Players.Player_Info;
-               WEPlayer: In Players.Player_Info);
-    entry Play(Final_Board: Out Players.Game_Board.Board_T);
-  end Play_T;
-
+  task type Game_T(NS, EW: access Players.Player_Info) is
+    entry Result(Board: Game_Board.Board_T);
+  end Game_T;
 end Game;

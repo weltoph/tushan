@@ -77,9 +77,13 @@ package Board is
 
   type Stone_T(<>) is private;
 
+  type Moves_T is array (0 .. 3) of Point_Sets.Set;
 
-  function Valid_Moves(Board: In Board_T; Stone: In Stone_T)
-    return Point_Sets.Set;
+  -- Returns the four rotations of a stone and their respective valid
+  -- placements onto the board.
+  -- @param Board The board the stone is placed on.
+  -- @param Stone The stone to be placed.
+  function Valid_Moves(Board: In Board_T; Stone: In Stone_T) return Moves_T;
 
   -- Places a stone on a board such that the upper left element of the stone is
   -- placed at placement.
