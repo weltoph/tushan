@@ -1,5 +1,13 @@
+with Ada.Wide_Text_IO;
 with Ada.Text_IO;
+
 package body Board is
+
+  function Empty_Board return Board_T
+  is
+  begin
+    return (others => (others => (Occupied => False)));
+  end Empty_Board;
 
   function Valid_Moves(Board: In Board_T; Stone: In Stone_T) return Moves_T
   is
@@ -13,25 +21,28 @@ package body Board is
       procedure Handle(Current: In Point_T)
       is
         Fits: constant Boolean := Fits_Dimensions(Stone, Current);
-        Cover: constant Point_Sets.Set := Covers(Stone, Current);
       begin
         if not Fits then return; end if;
-        if Occupied.Is_Empty then
-          if Middle_Points.Intersection(Cover).Is_Empty then return; end if;
-          Result.Insert(Current);
-        else
-          if not Occupied.Intersection(Cover).Is_Empty then return; end if;
-          declare
-            Consistent: Connective_Sets.Set;
-            Increasing: Connective_Sets.Set;
-            Everything: constant Connective_Sets.Set := Connectives(Stone, Current);
-          begin
-            Connects(Board, Stone, Current, Consistent, Increasing);
-            if not Connective_Sets.Equivalent_Sets(Consistent, Everything) then return; end if;
-            if Increasing.Is_Empty then return; end if;
+        declare
+          Cover: constant Point_Sets.Set := Covers(Stone, Current);
+        begin
+          if Occupied.Is_Empty then
+            if Middle_Points.Intersection(Cover).Is_Empty then return; end if;
             Result.Insert(Current);
-          end;
-        end if;
+          else
+            if not Occupied.Intersection(Cover).Is_Empty then return; end if;
+            declare
+              Consistent: Connective_Sets.Set;
+              Increasing: Connective_Sets.Set;
+              Everything: constant Connective_Sets.Set := Connectives(Stone, Current);
+            begin
+              Connects(Board, Stone, Current, Consistent, Increasing);
+              if not Connective_Sets.Equivalent_Sets(Consistent, Everything) then return; end if;
+              if Increasing.Is_Empty then return; end if;
+              Result.Insert(Current);
+            end;
+          end if;
+        end;
       end Handle;
     begin
       for X in X_Coordinate loop
@@ -49,18 +60,12 @@ package body Board is
     RRStone: constant Stone_T := Rotate(RStone);
     RRRStone: constant Stone_T := Rotate(RRStone);
   begin
-    Ada.Text_IO.Put_Line("Generating valid moves.");
     return (
       0 => Valid_Moves_For_Rotation(Stone),
       1 => Valid_Moves_For_Rotation(RStone),
       2 => Valid_Moves_For_Rotation(RRStone),
       3 => Valid_Moves_For_Rotation(RRRStone));
   end Valid_Moves;
-
-  function New_Board return Board_T is
-  begin
-    return (others => (others => (Occupied => False)));
-  end New_Board;
 
   function "<" (P1, P2: In Point_T) return Boolean is
   begin
@@ -242,56 +247,76 @@ package body Board is
 
   function Get_Border (Stone: In Stone_T; Direction: In Direction_T)
     return Border_T is
-    Width: constant Positive := Get_Width (Stone);
-    Height: constant Positive := Get_Height (Stone);
   begin
     case Direction is
       when North =>
         declare
-          Border: Border_T (1 .. Width) := (others => Closed);
+          Border: Border_T (1 .. Get_Width(Stone)) := (others => Closed);
+          Border_X: Positive := 1;
         begin
-          for X in 1 .. Width loop
-            Border (X) := Stone (X, 1)(North);
+          for X in Stone'Range(1) loop
+            Border(Border_X) := Stone(X, Stone'First(2))(North);
+            Border_X := Border_X+1;
           end loop;
           return Border;
         end;
       when South =>
         declare
-          Border: Border_T (1 .. Width) := (others => Closed);
+          Border: Border_T (1 .. Get_Width(Stone)) := (others => Closed);
+          Border_X: Positive := 1;
         begin
-          for X in 1 .. Width loop
-            Border (X) := Stone (Width - X + 1, Height)(South);
+          for X in Stone'Range(1) loop
+            Border (Border_X) := Stone (Stone'Last(1) - X + Stone'First(1), Stone'Last(2))(South);
+            Border_X := Border_X+1;
           end loop;
           return Border;
         end;
       when East =>
         declare
-          Border: Border_T (1 .. Height) := (others => Closed);
+          Border: Border_T (1 .. Get_Height(Stone)) := (others => Closed);
+          Border_Y: Positive := 1;
         begin
-          for Y in 1 .. Height loop
-            Border (Y) := Stone (Width, Y)(East);
+          for Y in Stone'Range(2) loop
+            Border (Border_Y) := Stone (Stone'Last(1), Y)(East);
+            Border_Y := Border_Y + 1;
           end loop;
           return Border;
         end;
       when West =>
         declare
-          Border: Border_T (1 .. Height) := (others => Closed);
+          Border: Border_T (1 .. Get_Height(Stone)) := (others => Closed);
+          Border_Y: Positive := 1;
         begin
-          for Y in 1 .. Height loop
-            Border (Y) := Stone (1, Height - Y + 1)(West);
+          for Y in Stone'Range(2) loop
+            Border (Border_Y) := Stone (1, Stone'Last(2) - Y + Stone'First(2))(West);
+            Border_Y := Border_Y + 1;
           end loop;
           return Border;
         end;
     end case;
   end Get_Border;
 
-  function Rotate (Stone: In Stone_T) return Stone_T is
+  function Rotate (Stone: In Stone_T; Repetitions: In Rotation_T := 1) return Stone_T is
   begin
-    return Stone_From_Borders (
-      Get_Border (Stone, West),
-      Get_Border (Stone, North),
-      Get_Border (Stone, East),
-      Get_Border (Stone, South));
+    case Repetitions is
+      when 0 => return Stone_From_Borders(Get_Border(Stone, North),
+                                          Get_Border(Stone, East),
+                                          Get_Border(Stone, South),
+                                          Get_Border(Stone, West));
+      when 1 => return Stone_From_Borders(Get_Border(Stone, West),
+                                          Get_Border(Stone, North),
+                                          Get_Border(Stone, East),
+                                          Get_Border(Stone, South));
+      when 2 => return Stone_From_Borders(Get_Border(Stone, South),
+                                          Get_Border(Stone, West),
+                                          Get_Border(Stone, North),
+                                          Get_Border(Stone, East));
+      when 3 => return Stone_From_Borders(Get_Border(Stone, East),
+                                          Get_Border(Stone, South),
+                                          Get_Border(Stone, West),
+                                          Get_Border(Stone, North));
+      when others => raise Constraint_Error with "Value of Repetitions is not in the expected range of Rotation_T";
+    end case;
   end Rotate;
 
  function Stone_From_Borders(Northern_Border: Border_T;
@@ -299,51 +324,66 @@ package body Board is
                              Southern_Border: Border_T;
                              Western_Border: Border_T)
                              return Stone_T is
-   Width:  constant Positive := Northern_Border'Length;
-   Height: constant Positive := Eastern_Border'Length;
-   Stone: Stone_T(1 .. Width, 1 .. Height) := (
+   Stone_Width:  constant Positive := Northern_Border'Length;
+   Stone_Height: constant Positive := Eastern_Border'Length;
+   Stone: Stone_T(1 .. Stone_Width, 1 .. Stone_Height) := (
      others => (
        others => (North => Inner,
                   East => Inner,
                   South => Inner,
                   West => Inner)));
  begin
-   if Southern_Border'Length /= Width or Western_Border'Length /= Height then
+   if Southern_Border'Length /= Stone_Width or Western_Border'Length /= Stone_Height then
      -- errorneous state
      raise Board_Error with "Inconsistent borders for stone.";
    end if;
 
-   for X in 1 .. Width loop
-     declare
-       Northern: constant Border_Connector_T := Northern_Border(X);
-       Southern: constant Border_Connector_T := Southern_Border(Width - X + 1);
-     begin
-       Stone(X, 1)(North) := Northern;
-       Stone(X, Height)(South) := Southern;
-     end;
-   end loop;
+   declare
+     Stone_X: Positive := 1;
+   begin
+     for I in Northern_Border'Range loop
+      Stone(Stone_X, Stone'First(2))(North) := Northern_Border(I);
+      Stone_X := Stone_X + 1;
+     end loop;
+   end;
 
-   for Y in 1 .. Height loop
-     declare
-       Eastern: constant Border_Connector_T := Eastern_Border(Y);
-       Western: constant Border_Connector_T := Western_Border(Height - Y + 1);
-     begin
-       Stone(1, Y)(West) := Western;
-       Stone(Width, Y)(East) := Eastern;
-     end;
-   end loop;
+   declare
+     Stone_X: Positive := 1;
+   begin
+     for I in reverse Southern_Border'Range loop
+      Stone(Stone_X, Stone'Last(2))(South) := Southern_Border(I);
+      Stone_X := Stone_X + 1;
+     end loop;
+   end;
 
+   declare
+     Stone_Y: Positive := 1;
+   begin
+     for I in Eastern_Border'Range loop
+      Stone(Stone'Last(1), Stone_Y)(East) := Eastern_Border(I);
+      Stone_Y := Stone_Y + 1;
+     end loop;
+   end;
+
+   declare
+     Stone_Y: Positive := 1;
+   begin
+     for I in reverse Western_Border'Range loop
+      Stone(Stone'First(1), Stone_Y)(West) := Western_Border(I);
+      Stone_Y := Stone_Y + 1;
+     end loop;
+   end;
    return Stone;
  end Stone_From_Borders;
 
   function Get_Width (Stone: in Stone_T) return Positive is
   begin
-    return Stone'Length (1);
+    return Stone'Length(1);
   end Get_Width;
 
   function Get_Height (Stone: in Stone_T) return Positive is
   begin
-    return Stone'Length (2);
+    return Stone'Length(2);
   end Get_Height;
 
   procedure Connects (Board: In Board_T;
@@ -355,8 +395,8 @@ package body Board is
     Southern_Border: constant Border_T := Get_Border (Stone, South);
     Eastern_Border: constant Border_T := Get_Border (Stone, East);
     Western_Border: constant Border_T := Get_Border (Stone, West);
-    Width: constant Positive := Get_Width (Stone);
-    Height: constant Positive := Get_Height (Stone);
+    Width: constant Positive := Get_Width(Stone);
+    Height: constant Positive := Get_Height(Stone);
   begin
     for X in 1 .. Width loop
       declare
@@ -454,5 +494,128 @@ package body Board is
     end loop;
     return Result;
   end Occupied_Points;
+
+  pragma Wide_Character_Encoding(UTF8);
+
+  procedure Display_Stone (Stone: In Stone_T)
+  is
+    type Tile_Display is array (1 .. 3, 1 .. 3) of Wide_Character;
+
+    function Render_Tile (Tile: In Field_T) return Tile_Display is
+      Display: Tile_Display := (others => (others => ' '));
+    begin
+      if Tile(North) = Closed then
+        Display(2, 1) := '─';
+      elsif Tile(North) = Open then
+        Display(2, 1) := '┴';
+      end if;
+
+      if Tile(East) = Closed then
+        Display(3, 2) := '│';
+      elsif Tile(East) = Open then
+        Display(3, 2) := '├';
+      end if;
+
+      if Tile(South) = Closed then
+        Display(2, 3) := '─';
+      elsif Tile(South) = Open then
+        Display(2, 3) := '┬';
+      end if;
+
+      if Tile(West) = Closed then
+        Display(1, 2) := '│';
+      elsif Tile(West) = Open then
+        Display(1, 2) := '┤';
+      end if;
+
+      if Tile(North) /= Inner then
+        if Tile(West) /= Inner then
+          Display(1, 1) := '┌';
+        else
+          Display(1, 1) := '─';
+        end if;
+
+        if Tile(East) /= Inner then
+          Display(3, 1) := '┐';
+        else
+          Display(3, 1) := '─';
+        end if;
+      else
+        if Tile(West) /= Inner then
+          Display(1, 1) := '│';
+        end if;
+
+        if Tile(East) /= Inner then
+          Display(3, 1) := '│';
+        end if;
+      end if;
+
+      if Tile(South) /= Inner then
+        if Tile(West) /= Inner then
+          Display(1, 3) := '└';
+        else
+          Display(1, 3) := '─';
+        end if;
+
+        if Tile(East) /= Inner then
+          Display(3, 3) := '┘';
+        else
+          Display(3, 3) := '─';
+        end if;
+      else
+        if Tile(West) /= Inner then
+          Display(1, 3) := '│';
+        end if;
+
+        if Tile(East) /= Inner then
+          Display(3, 3) := '│';
+        end if;
+      end if;
+      return Display;
+    end Render_Tile;
+
+    All_Chars: array (1 .. 3*Get_Width(Stone), 1 .. 3*Get_Height(Stone)) of Wide_Character;
+  begin
+    for Y in Stone'Range(2) loop
+      for X in Stone'Range(1) loop
+        declare
+          T: constant Tile_Display := Render_Tile(Stone(X, Y));
+        begin
+          All_Chars(3*(X-1)+1, 3*(Y-1)+1) := T(1, 1);
+          All_Chars(3*(X-1)+2, 3*(Y-1)+1) := T(2, 1);
+          All_Chars(3*(X-1)+3, 3*(Y-1)+1) := T(3, 1);
+
+          All_Chars(3*(X-1)+1, 3*(Y-1)+2) := T(1, 2);
+          All_Chars(3*(X-1)+2, 3*(Y-1)+2) := T(2, 2);
+          All_Chars(3*(X-1)+3, 3*(Y-1)+2) := T(3, 2);
+
+          All_Chars(3*(X-1)+1, 3*(Y-1)+3) := T(1, 3);
+          All_Chars(3*(X-1)+2, 3*(Y-1)+3) := T(2, 3);
+          All_Chars(3*(X-1)+3, 3*(Y-1)+3) := T(3, 3);
+        end;
+      end loop;
+    end loop;
+    for Y in All_Chars'Range(2) loop
+      for X in All_Chars'Range(1) loop
+        Ada.Wide_Text_IO.Put(All_Chars(X, Y));
+      end loop;
+      Ada.Wide_Text_IO.Put_Line("");
+    end loop;
+  end Display_Stone;
+
+  procedure Display_Border (Border: In Border_T)
+  is
+  begin
+    for I in Border'Range loop
+      if Border(I) = Closed then
+        Ada.Wide_Text_IO.Put('─');
+      elsif Border(I) = Open then
+        Ada.Wide_Text_IO.Put('┴');
+      else
+        raise Board_Error with "A border must not have value " & Border(I)'Image;
+      end if;
+    end loop;
+    Ada.Wide_Text_IO.Put_Line("");
+  end Display_Border;
 
 end Board;

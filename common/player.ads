@@ -12,7 +12,8 @@ package Player is
 
   procedure Next_Move(Player: In Player_Interface;
                       Board: In Game_Board.Board_T;
-                      Stone: In Out Game_Board.Stone_T;
+                      Stone: In Game_Board.Stone_T;
+                      Rotations: Out Game_Board.Rotation_T;
                       Placement: Out Game_Board.Point_T) is abstract;
 
   procedure Disqualify(Player: In Player_Interface) is abstract;
@@ -43,7 +44,8 @@ package Player is
 
   procedure Next_Move(Player: In Random_Player;
                       Board: In Game_Board.Board_T;
-                      Stone: In Out Game_Board.Stone_T;
+                      Stone: In Game_Board.Stone_T;
+                      Rotations: Out Game_Board.Rotation_T;
                       Placement: Out Game_Board.Point_T);
 
   procedure Disqualify(Player: In Random_Player);

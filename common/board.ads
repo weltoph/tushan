@@ -14,9 +14,7 @@ package Board is
   -- as a two dimensional space of squares.
   type Board_T is private;
 
-  -- This function generates an empty new board.
-  -- @return The new empty board.
-  function New_Board return Board_T;
+  function Empty_Board return Board_T;
 
   subtype X_Coordinate is Positive range 1 .. Width;
   subtype Y_Coordinate is Positive range 1 .. Height;
@@ -26,12 +24,15 @@ package Board is
   -- type.
   type Direction_T is (North, East, South, West);
 
+  -- A point is simply the canoncical composition of an X and Y coordinate.
   type Point_T is
     record
       X: X_Coordinate;
       Y: Y_Coordinate;
     end record;
 
+  -- We introduce a linear order on points; for all intents and purposes think
+  -- about it as the lexicographic order.
   function "<" (P1, P2: In Point_T) return Boolean;
 
   package Point_Sets is new Ada.Containers.Ordered_Sets(
@@ -39,20 +40,8 @@ package Board is
     "<" => "<",
     "=" => "=");
 
+  -- This returns a set of points which constitute the middle of the field.
   function Middle return Point_Sets.Set;
-
-  type Connective_T is
-    record
-      Point: Point_T;
-      Direction: Direction_T;
-    end record;
-
-  function "<" (C1, C2: In Connective_T) return Boolean;
-
-  package Connective_Sets is new Ada.Containers.Ordered_Sets(
-    Element_Type => Connective_T,
-    "<" => "<",
-    "=" => "=");
 
   -- The connection of one square in one direction can have different states:
   -- @value Closed when the is some square placed at these coordinates and the
@@ -71,13 +60,42 @@ package Board is
   subtype Inner_Connector_T is Connector_T range Closed .. Inner;
   subtype Border_Connector_T is Inner_Connector_T range Closed .. Open;
 
+  -- A connective is a point and a direction. It uniquely identifies a
+  -- Connector_T in any given board.
+  type Connective_T is
+    record
+      Point: Point_T;
+      Direction: Direction_T;
+    end record;
+
+  function "<" (C1, C2: In Connective_T) return Boolean;
+
+  package Connective_Sets is new Ada.Containers.Ordered_Sets(
+    Element_Type => Connective_T,
+    "<" => "<",
+    "=" => "=");
+
   type Field_T is array (Direction_T) of Inner_Connector_T;
 
   type Border_T is array (Positive range <>) of Border_Connector_T;
 
   type Stone_T(<>) is private;
 
-  type Moves_T is array (0 .. 3) of Point_Sets.Set;
+  -- Any Stone_T can be rotated. This subtype associates with this operation.
+  -- This means that any pair of a Stone_T and a value of Rotation_T gives some
+  -- stone.
+  subtype Rotation_T is Natural range 0 .. 3;
+
+  -- Constructs a stone that is a copy of another stone but rotated by 90° (as
+  -- often as Repetitions demands).
+  -- @param Stone The stone to rotate.
+  -- @param Repetitions The amount of rotations.
+  -- @return A copy of the stone but rotated by 90°*Repetitions.
+  function Rotate (Stone: In Stone_T; Repetitions: In Rotation_T := 1) return Stone_T;
+
+
+  -- This type represents as a compound all valid moves for a given stone.
+  type Moves_T is array (Rotation_T) of Point_Sets.Set;
 
   -- Returns the four rotations of a stone and their respective valid
   -- placements onto the board.
@@ -163,11 +181,6 @@ package Board is
   function Get_Width (Stone: in Stone_T) return Positive;
   function Get_Height (Stone: in Stone_T) return Positive;
 
-  -- Constructs a stone that is a copy of another stone but rotated by 90°.
-  -- @param Stone The stone to rotate.
-  -- @return A copy of the stone but rotated by 90°.
-  function Rotate (Stone: In Stone_T) return Stone_T;
-
   -- Constructs a stone from four borders which are placed roundabout the
   -- stone.
   -- @param Northern_Border The northern border of the stone.
@@ -221,6 +234,9 @@ package Board is
   function Occupied_Points (Board: In Board_T) return Point_Sets.Set;
 
   Board_Error: exception;
+
+  procedure Display_Stone (Stone: In Stone_T);
+  procedure Display_Border (Border: In Border_T);
 
   private
 

@@ -14,6 +14,7 @@ package body Board_Test is
       Register_Routine (T, Test_Connectives'Access, "Test connectives of stone");
       Register_Routine (T, Test_Fits_Dimensions'Access, "Test dimentional fit of stone");
       Register_Routine (T, Test_Connects'Access, "Test connections of stone");
+      Register_Routine (T, Test_Valid_Moves'Access, "Test valid moves for stone on board");
    end Register_Tests;
 
   function Name (T: Board_Test) return AUnit.Message_String is
@@ -23,12 +24,11 @@ package body Board_Test is
 
   procedure Test_Place (T: in out AUnit.Test_Cases.Test_Case'Class) is
     use Board_10;
-    Test_Board: Board_10.Board_T := Board_10.New_Board;
+    Test_Board: Board_10.Board_T;
 
     Test_Stone: constant Board_10.Stone_T := Board_10.Stone_From_Borders (
       (1 => Open,   2 => Closed, 3 => Closed, 4 => Closed),
-      (1 => Closed, 2 => Open),
-      (1 => Closed, 2 => Closed, 3 => Open,   4 => Closed),
+      (1 => Closed, 2 => Open), (1 => Closed, 2 => Closed, 3 => Open,   4 => Closed),
       (1 => Closed, 2 => Open));
 
     Occupied_Places: constant array (Board_10.X_Coordinate,
@@ -202,14 +202,51 @@ package body Board_Test is
       Border_T'(1 => Closed, 2 => Open, 3 => Closed));
 
   begin
+    AUnit.Assertions.Assert (Original_Stone = Rotate (Original_Stone, 0),
+                             "Identity rotation for original");
+    AUnit.Assertions.Assert (Once_Stone = Rotate (Once_Stone, 0),
+                             "Identity rotation for once");
+    AUnit.Assertions.Assert (Twice_Stone = Rotate (Twice_Stone, 0),
+                             "Identity rotation for twice");
+    AUnit.Assertions.Assert (Thrice_Stone = Rotate (Thrice_Stone, 0),
+                             "Identity rotation for thrice");
+
+
     AUnit.Assertions.Assert (Once_Stone = Rotate (Original_Stone),
                              "Incremental rotation original to once");
+    AUnit.Assertions.Assert (Once_Stone = Rotate (Original_Stone, 1),
+                             "Incremental rotation original to once explicitly");
+    AUnit.Assertions.Assert (Twice_Stone = Rotate (Original_Stone, 2),
+                             "Incremental rotation original to twice explicitly");
+    AUnit.Assertions.Assert (Thrice_Stone = Rotate (Original_Stone, 3),
+                             "Incremental rotation original to thrice explicitly");
+
     AUnit.Assertions.Assert (Twice_Stone = Rotate (Once_Stone),
                              "Incremental rotation once to twice");
+    AUnit.Assertions.Assert (Twice_Stone = Rotate (Once_Stone, 1),
+                             "Incremental rotation Once to twice explicitly");
+    AUnit.Assertions.Assert (Thrice_Stone = Rotate (Once_Stone, 2),
+                             "Incremental rotation Once to once explicitly");
+    AUnit.Assertions.Assert (Original_Stone = Rotate (Once_Stone, 3),
+                             "Incremental rotation Once to original explicitly");
+
     AUnit.Assertions.Assert (Thrice_Stone = Rotate (Twice_Stone),
                              "Incremental rotation twice to thrice");
+    AUnit.Assertions.Assert (Thrice_Stone = Rotate (Twice_Stone, 1),
+                             "Incremental rotation twice to thrice explicitly");
+    AUnit.Assertions.Assert (Original_Stone = Rotate (Twice_Stone, 2),
+                             "Incremental rotation twice to original explicitly");
+    AUnit.Assertions.Assert (Once_Stone = Rotate (Twice_Stone, 3),
+                             "Incremental rotation twice to once explicitly");
+
     AUnit.Assertions.Assert (Original_Stone = Rotate (Thrice_Stone),
                              "Incremental rotation thrice to original");
+    AUnit.Assertions.Assert (Original_Stone = Rotate (Thrice_Stone, 1),
+                             "Incremental rotation thrice to original explicitly");
+    AUnit.Assertions.Assert (Once_Stone = Rotate (Thrice_Stone, 2),
+                             "Incremental rotation thrice to once explicitly");
+    AUnit.Assertions.Assert (Twice_Stone = Rotate (Thrice_Stone, 3),
+                             "Incremental rotation thrice to twice explicitly");
   end Test_Rotation;
 
   procedure Test_Covers (T: in out AUnit.Test_Cases.Test_Case'Class) is
@@ -404,4 +441,44 @@ package body Board_Test is
     end;
 
   end Test_Connects;
+
+  procedure Test_Valid_Moves(T: in out AUnit.Test_Cases.Test_Case'Class)
+  is
+    use Board_10;
+
+    Board: Board_T;
+
+    First_Stone: constant Stone_T := Stone_From_Borders(
+      Border_T'(1 => Closed, 2 => Open, 3 => Closed),
+      Border_T'(1 => Closed, 2 => Open, 3 => Open),
+      Border_T'(1 => Open, 2 => Open, 3 => Closed),
+      Border_T'(1 => Closed, 2 => Open, 3 => Closed));
+
+    First_Valid_Placements: Point_Sets.Set;
+    First_Moves: constant Moves_T := Valid_Moves(Board, First_Stone);
+  begin
+    -- First_Stone has dimensions 3x3 and the middle of a 10x10 board should
+    -- be
+    -- <5, 5>, <6, 5>,
+    -- <5, 6>, <6, 6>.
+    -- A 3x3 stone covers any of these fields at:
+    -- <3, 3>, <4, 3>, <5, 3>, <6, 3>,
+    -- <3, 4>, <4, 4>, <5, 4>, <6, 4>,
+    -- <3, 5>, <4, 5>, <5, 5>, <6, 5>,
+    -- <3, 6>, <4, 6>, <5, 6>, <6, 6>.
+    -- Consequently, we expect for every rotation precisely these values.
+    Point_Sets.Include(First_Valid_Placements, (3, 3)); Point_Sets.Include(First_Valid_Placements, (4, 3)); Point_Sets.Include(First_Valid_Placements, (5, 3)); Point_Sets.Include(First_Valid_Placements, (6, 3));
+    Point_Sets.Include(First_Valid_Placements, (3, 4)); Point_Sets.Include(First_Valid_Placements, (4, 4)); Point_Sets.Include(First_Valid_Placements, (5, 4)); Point_Sets.Include(First_Valid_Placements, (6, 4));
+    Point_Sets.Include(First_Valid_Placements, (3, 5)); Point_Sets.Include(First_Valid_Placements, (4, 5)); Point_Sets.Include(First_Valid_Placements, (5, 5)); Point_Sets.Include(First_Valid_Placements, (6, 5));
+    Point_Sets.Include(First_Valid_Placements, (3, 6)); Point_Sets.Include(First_Valid_Placements, (4, 6)); Point_Sets.Include(First_Valid_Placements, (5, 6)); Point_Sets.Include(First_Valid_Placements, (6, 6));
+
+    AUnit.Assertions.Assert (Point_Sets.Equivalent_Sets(First_Moves(0), First_Valid_Placements),
+                             "Valid placements on empty board without rotation.");
+    AUnit.Assertions.Assert (Point_Sets.Equivalent_Sets(First_Moves(1), First_Valid_Placements),
+                             "Valid placements on empty board with one rotation.");
+    AUnit.Assertions.Assert (Point_Sets.Equivalent_Sets(First_Moves(2), First_Valid_Placements),
+                             "Valid placements on empty board with two rotations.");
+    AUnit.Assertions.Assert (Point_Sets.Equivalent_Sets(First_Moves(3), First_Valid_Placements),
+                             "Valid placements on empty board with three rotations.");
+  end Test_Valid_Moves;
 end Board_Test;

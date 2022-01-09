@@ -14,5 +14,6 @@ package Board_Test is
   procedure Test_Connectives (T: in out AUnit.Test_Cases.Test_Case'Class);
   procedure Test_Fits_Dimensions (T: in out AUnit.Test_Cases.Test_Case'Class);
   procedure Test_Connects (T: in out AUnit.Test_Cases.Test_Case'Class);
+  procedure Test_Valid_Moves (T: in out AUnit.Test_Cases.Test_Case'Class);
 
 end Board_Test;
