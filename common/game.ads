@@ -1,5 +1,7 @@
 with Board;
 with Player;
+with Ada.Containers.Synchronized_Queue_Interfaces;
+with Ada.Containers.Bounded_Queue;
 
 generic
   with package Game_Board is new Board(<>);
@@ -28,6 +30,8 @@ package Game is
       X: Message_Coordinates;
       Y: Message_Coordinates;
     end record;
+
+  package OutQueue is new 
 
   package Players is new Player(Game_Board);
 
