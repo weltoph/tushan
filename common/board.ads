@@ -17,8 +17,6 @@ package Board is
   -- as a two dimensional space of squares.
   type Board_T is private;
 
-  function Empty_Board return Board_T;
-
   subtype X_Coordinate is Positive range 1 .. Width;
   subtype Y_Coordinate is Positive range 1 .. Height;
 
@@ -83,7 +81,8 @@ package Board is
 
   type Field_T is array (Direction_T) of Inner_Connector_T;
 
-  type Border_T is array (Positive range <>) of Border_Connector_T;
+  type Horizontal_Border_T is array (Stone_X_Coordinate) of Border_Connector_T;
+  type Vertical_Border_T is array (Stone_Y_Coordinate) of Border_Connector_T;
 
   type Stone_T is private;
 
@@ -104,125 +103,43 @@ package Board is
   -- placements onto the board.
   -- @param Board The board the stone is placed on.
   -- @param Stone The stone to be placed.
-  function Valid_Moves(Board: In Board_T; Stone: In Stone_T) return Moves_T;
+  --  function Valid_Moves(Board: In Board_T; Stone: In Stone_T) return Moves_T;
 
-  -- Places a stone on a board such that the upper left element of the stone is
-  -- placed at placement.
-  -- @param Board The board the stone is placed on.
-  -- @param Stone The stone to be placed.
-  -- @param Placement The coordinates of the upper left corner of the stone
-  -- on the board.
-  -- @exception Board.Board_Error raised if the stone would overlap with a
-  -- previously placed stone; i.e., if
-  --   Is_Empty (Intersection (Covers (Stone, Placement), Occupied_Places (Board))) = False
-  procedure Place (Board: In Out Board_T;
-                   Stone: In Rotated_Stone_T;
-                   Placement: In Point_T);
+  --  procedure Place (Board: In Out Board_T;
+  --                   Stone: In Rotated_Stone_T;
+  --                   Placement: In Point_T);
 
-  -- Returns a set of points that a stone covers if put at point.
-  -- @param Stone The stone to use.
-  -- @param Point The point to put the upper left corner of the stone to return
-  -- the "shadow" it casts.
-  -- @return The set of points the stone would cover if places at the given
-  -- point.
-  -- @exception Board.Board_Error Thrown if the shadow of the stone lies
-  -- outside the board dimensions.
-  function Covers (Stone: In Rotated_Stone_T; Point: In Point_T) return Point_Sets.Set;
+  --  function Covers (Stone: In Rotated_Stone_T; Point: In Point_T) return Point_Sets.Set;
 
-  -- Returns a set of connectives that a stone has if put at point.
-  -- @param Stone The stone to use.
-  -- @param Point The point to put the upper left corner of the stone.
-  -- @return The set of connectives the stone has to the rest of the board.
-  -- @exception Board.Board_Error Thrown if the shadow of the stone lies
-  -- outside the board dimensions.
-  function Connectives (Stone: In Rotated_Stone_T; Point: In Point_T) return Connective_Sets.Set;
+  function Connectives (Stone: In Rotated_Stone_T; Point: In Point_T) return Connective_Sets.Set
+    with Pre => Fits_Dimensions (Stone.Rotation, Point);
 
-  -- Returns whether the stone put on this point fits the dimensions of the
-  -- board.
-  -- @param Stone The stone to use.
-  -- @param Point The point to put the upper left corner of the stone to return
-  -- whether it then fits the board.
-  -- @return Whether the stone when put at the point would fit into the
-  -- dimensions of the board.
-  function Fits_Dimensions (Stone: In Rotated_Stone_T; Point: In Point_T) return Boolean;
+  function Fits_Dimensions (Rotation: In Rotation_T; Point: In Point_T) return Boolean;
 
-  -- Checks whether a stone connects to the other stones on the board if placed
-  -- at postition Placement. That is, open connectors only
-  -- connect to either open, empty, or outer connectors, and closed connectors
-  -- connect only to closed, empty, or outer connectors. The procedure returns
-  -- two values; that is, Consistent and Increasing. Consistent is set to true
-  -- if all connectors have a fitting counterpart. Increasing is set to true if
-  -- the stone connects at least one one open connector to another one.
-  -- @param Stone The stone to check the connections for.
-  -- @param Board The board to check the connections at.
-  -- @param Placement The coordinates of the upper left corner of the stone
-  -- on the board.
-  -- @param Consistent_Connectives Indicates which connectives of the stone are
-  -- consistent with the current state of Board if placed at Placement
-  -- the already placed stones on the board.
-  -- @param Increasing_Connectives Indicates which connectives of the stone
-  -- connect open connectors with open connectors.
-  -- @exception Board.Board_Error Thrown if an inconsistent state is detected;
-  -- e.g., an overlap with another stone which is detected by
-  -- seeing Inner connectors. Although, this check is not
-  -- complete: if fails, for example, when a stone is checked to
-  -- be put precisely on another stone that is already placed.
-  procedure Connects (Board: In Board_T;
-                      Stone: In Rotated_Stone_T;
-                      Placement: In Point_T;
-                      Consistent_Connectives: Out Connective_Sets.Set;
-                      Increasing_Connectives: Out Connective_Sets.Set);
+  --  procedure Connects (Board: In Board_T;
+  --                      Stone: In Rotated_Stone_T;
+  --                      Placement: In Point_T;
+  --                      Consistent_Connectives: Out Connective_Sets.Set;
+  --                      Increasing_Connectives: Out Connective_Sets.Set);
 
-  -- Constructs a stone from four borders which are placed roundabout the
-  -- stone.
-  -- @param Northern_Border The northern border of the stone.
-  -- @param Eastern_Border The eastern border of the stone.
-  -- @param Southern_Border The southern border of the stone.
-  -- @param Western_Border The western border of the stone.
-  -- @return The stone constructed from the borders.
-  -- @exception Board.Board_Error Thrown if opposite borders are of different
-  -- length.
-  function Stone_From_Borders(Northern_Border: Border_T;
-                              Eastern_Border: Border_T;
-                              Southern_Border: Border_T;
-                              Western_Border: Border_T)
+  function Stone_From_Borders(Northern_Border: Horizontal_Border_T;
+                              Eastern_Border: Vertical_Border_T;
+                              Southern_Border: Horizontal_Border_T;
+                              Western_Border: Vertical_Border_T)
                               return Stone_T;
 
-  -- Get_Connector returns which logical connector type occurs for some square
-  -- in some direction.
-  -- @param Board The board to check the connector for.
-  -- @param Point The coordinates of the square to check.
-  -- @param Direction The direction in which the square is checked.
-  -- @return The connector type khat is at field (X, Y) in direction Direction
-  -- on Board.
   function Get_Connector (Board: In Board_T;
                           Point: In Point_T;
                           Direction: In Direction_T)
                           return Connector_T;
 
-  -- Get_Opposing_Connector returns which logical connector type occurs on the
-  -- other side of some square in some direction.
-  -- @param Board The board to check the connector for.
-  -- @param Point The coordinates of the square to check.
-  -- @param Direction The direction in which the square is checked.
-  -- @return The connector type that is opposite of field (X, Y) in direction
-  -- Direction on Board. For example,
-  --   Get_Opposing_Connector(board, x, y, North) = Get_Connector(board, x-1, y, South)
-  -- For appropiate board, x, and y.
   function Get_Opposing_Connector (Board: In Board_T;
                                    Point: In Point_T;
                                    Direction: In Direction_T)
                                    return Connector_T;
 
-  -- Checks whether the square at some position is already occupied.
-  -- @param Board The board to inspect the position in.
-  -- @param Point The coordinates of the position to check.
-  -- @return Returns whether that square already is occupied by some stone.
   function Is_Occupied (Board: In Board_T; Point: In Point_T) return Boolean;
 
-  -- Gets all occupied places of the given board.
-  -- @param Board The board to get the points to.
-  -- @return Set of all points that are currently occupied in Board.
   function Occupied_Points (Board: In Board_T) return Point_Sets.Set;
 
   Board_Error: exception;
