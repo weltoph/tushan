@@ -9,6 +9,9 @@ with Ada.Containers.Ordered_Sets;
 generic
   Width: Positive;
   Height: Positive;
+
+  Stone_Width: Positive;
+  Stone_Height: Positive;
 package Board is
   -- The central representation of a board. Logically, one can think of a board
   -- as a two dimensional space of squares.
@@ -18,6 +21,9 @@ package Board is
 
   subtype X_Coordinate is Positive range 1 .. Width;
   subtype Y_Coordinate is Positive range 1 .. Height;
+
+  subtype Stone_X_Coordinate is Positive range 1 .. Stone_Width;
+  subtype Stone_Y_Coordinate is Positive range 1 .. Stone_Height;
 
   -- We consider a board to be a discrete two-dimensional space of squares.
   -- Hence, there is a natural concept of directions which is captured by this
@@ -79,20 +85,17 @@ package Board is
 
   type Border_T is array (Positive range <>) of Border_Connector_T;
 
-  type Stone_T(<>) is private;
+  type Stone_T is private;
 
   -- Any Stone_T can be rotated. This subtype associates with this operation.
   -- This means that any pair of a Stone_T and a value of Rotation_T gives some
   -- stone.
   subtype Rotation_T is Natural range 0 .. 3;
 
-  -- Constructs a stone that is a copy of another stone but rotated by 90° (as
-  -- often as Repetitions demands).
-  -- @param Stone The stone to rotate.
-  -- @param Repetitions The amount of rotations.
-  -- @return A copy of the stone but rotated by 90°*Repetitions.
-  function Rotate (Stone: In Stone_T; Repetitions: In Rotation_T := 1) return Stone_T;
-
+  type Rotated_Stone_T is record
+    Stone: Stone_T;
+    Rotation: Rotation_T;
+  end record;
 
   -- This type represents as a compound all valid moves for a given stone.
   type Moves_T is array (Rotation_T) of Point_Sets.Set;
@@ -113,7 +116,7 @@ package Board is
   -- previously placed stone; i.e., if
   --   Is_Empty (Intersection (Covers (Stone, Placement), Occupied_Places (Board))) = False
   procedure Place (Board: In Out Board_T;
-                   Stone: In Stone_T;
+                   Stone: In Rotated_Stone_T;
                    Placement: In Point_T);
 
   -- Returns a set of points that a stone covers if put at point.
@@ -124,7 +127,7 @@ package Board is
   -- point.
   -- @exception Board.Board_Error Thrown if the shadow of the stone lies
   -- outside the board dimensions.
-  function Covers (Stone: In Stone_T; Point: In Point_T) return Point_Sets.Set;
+  function Covers (Stone: In Rotated_Stone_T; Point: In Point_T) return Point_Sets.Set;
 
   -- Returns a set of connectives that a stone has if put at point.
   -- @param Stone The stone to use.
@@ -132,7 +135,7 @@ package Board is
   -- @return The set of connectives the stone has to the rest of the board.
   -- @exception Board.Board_Error Thrown if the shadow of the stone lies
   -- outside the board dimensions.
-  function Connectives (Stone: In Stone_T; Point: In Point_T) return Connective_Sets.Set;
+  function Connectives (Stone: In Rotated_Stone_T; Point: In Point_T) return Connective_Sets.Set;
 
   -- Returns whether the stone put on this point fits the dimensions of the
   -- board.
@@ -141,7 +144,7 @@ package Board is
   -- whether it then fits the board.
   -- @return Whether the stone when put at the point would fit into the
   -- dimensions of the board.
-  function Fits_Dimensions (Stone: In Stone_T; Point: In Point_T) return Boolean;
+  function Fits_Dimensions (Stone: In Rotated_Stone_T; Point: In Point_T) return Boolean;
 
   -- Checks whether a stone connects to the other stones on the board if placed
   -- at postition Placement. That is, open connectors only
@@ -165,21 +168,10 @@ package Board is
   -- complete: if fails, for example, when a stone is checked to
   -- be put precisely on another stone that is already placed.
   procedure Connects (Board: In Board_T;
-                      Stone: In Stone_T;
+                      Stone: In Rotated_Stone_T;
                       Placement: In Point_T;
                       Consistent_Connectives: Out Connective_Sets.Set;
                       Increasing_Connectives: Out Connective_Sets.Set);
-
-  -- Returns the border of a stone in a certain direction.
-  -- @param Stone The stone for which we return the border.
-  -- @param Direction Which border to return.
-  -- @return The border of the direction of the stone.
-  function Get_Border (Stone: In Stone_T;
-                       Direction: In Direction_T) return Border_T;
-
-
-  function Get_Width (Stone: in Stone_T) return Positive;
-  function Get_Height (Stone: in Stone_T) return Positive;
 
   -- Constructs a stone from four borders which are placed roundabout the
   -- stone.
@@ -235,9 +227,6 @@ package Board is
 
   Board_Error: exception;
 
-  procedure Display_Stone (Stone: In Stone_T);
-  procedure Display_Border (Border: In Border_T);
-
   private
 
   type Board_Field_T (Occupied: Boolean := False) is
@@ -249,6 +238,6 @@ package Board is
     end record;
 
   type Board_T is array (X_Coordinate, Y_Coordinate) of Board_Field_T;
-  type Stone_T is array (Positive range <>, Positive range <>) of Field_T;
+  type Stone_T is array (Stone_X_Coordinate, Stone_Y_Coordinate) of Field_T;
 
 end Board;
