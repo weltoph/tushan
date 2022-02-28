@@ -79,8 +79,6 @@ package Board is
     "<" => "<",
     "=" => "=");
 
-  type Field_T is array (Direction_T) of Inner_Connector_T;
-
   type Horizontal_Border_T is array (Stone_X_Coordinate) of Border_Connector_T;
   type Vertical_Border_T is array (Stone_Y_Coordinate) of Border_Connector_T;
 
@@ -105,9 +103,9 @@ package Board is
   -- @param Stone The stone to be placed.
   --  function Valid_Moves(Board: In Board_T; Stone: In Stone_T) return Moves_T;
 
-  --  procedure Place (Board: In Out Board_T;
-  --                   Stone: In Rotated_Stone_T;
-  --                   Placement: In Point_T);
+  procedure Place (Board: In Out Board_T;
+                   Stone: In Rotated_Stone_T;
+                   Placement: In Point_T);
 
   --  function Covers (Stone: In Rotated_Stone_T; Point: In Point_T) return Point_Sets.Set;
 
@@ -145,6 +143,8 @@ package Board is
   Board_Error: exception;
 
   private
+
+  type Field_T is array (Direction_T) of Inner_Connector_T;
 
   type Board_Field_T (Occupied: Boolean := False) is
     record

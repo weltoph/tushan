@@ -3,12 +3,12 @@ with Ada.Text_IO;
 with Board;
 
 package body Board_Test is
-  package Board_10 is new Board(10, 10, 3, 1);
+  package Board_10 is new Board(10, 10, 3, 2);
 
   procedure Register_Tests (T: in out Board_Test) is
       use AUnit.Test_Cases.Registration;
    begin
-      --  Register_Routine (T, Test_Place'Access, "Test placement of stone");
+      Register_Routine (T, Test_Place'Access, "Test placement of stone");
       --  Register_Routine (T, Test_Rotation'Access, "Test rotation of stone");
       --  Register_Routine (T, Test_Covers'Access, "Test cover of stone");
       --  Register_Routine (T, Test_Connectives'Access, "Test connectives of stone");
@@ -22,150 +22,112 @@ package body Board_Test is
     return AUnit.Format ("Testing stone");
   end Name;
 
-  --  procedure Test_Place (T: in out AUnit.Test_Cases.Test_Case'Class) is
-  --    use Board_10;
-  --    Test_Board: Board_10.Board_T;
+  procedure Test_Place (T: in out AUnit.Test_Cases.Test_Case'Class) is
+    use Board_10;
 
-  --    Test_Stone: constant Board_10.Stone_T := Board_10.Stone_From_Borders (
-  --      (1 => Open,   2 => Closed, 3 => Closed, 4 => Closed),
-  --      (1 => Closed, 2 => Open), (1 => Closed, 2 => Closed, 3 => Open,   4 => Closed),
-  --      (1 => Closed, 2 => Open));
+    Test_Stone: constant Board_10.Stone_T := Board_10.Stone_From_Borders (
+      (1 => Open, 2 => Closed, 3 => Closed),
+      (1 => Closed, 2 => Open),
+      (1 => Closed, 2 => Closed, 3 => Open),
+      (1 => Closed, 2 => Closed));
+    Placement: constant Board_10.Point_T := (5, 3);
+    type Board_State is array (Board_10.X_Coordinate, Board_10.Y_Coordinate, Direction_T) of Connector_T;
 
-  --    Occupied_Places: constant array (Board_10.X_Coordinate,
-  --                                     Board_10.Y_Coordinate) of Boolean := (
-  --       4 => (4 => True, 5 => True, others => False),
-  --       5 => (4 => True, 5 => True, others => False),
-  --       6 => (4 => True, 5 => True, others => False),
-  --       7 => (4 => True, 5 => True, others => False),
-  --       others => (others => False));
+    procedure Test_Occupation_Case(Rotated_Stone: In Board_10.Rotated_Stone_T; Expected_Board: In Board_State) is
+      Test_Board: Board_10.Board_T;
+    begin
+      Place(Test_Board, Rotated_Stone, Placement);
+      for X in Board_10.X_Coordinate loop
+        for Y in Board_10.Y_Coordinate loop
+          declare
+            Current_Point: constant Board_10.Point_T := (X, Y);
+          begin
+            for Dir in Direction_T loop
+              AUnit.Assertions.Assert(Get_Connector(Test_Board, Current_Point, Dir) = Expected_Board(X, Y, Dir),
+                                      "Mismatch at <" & Current_Point.X'Image & "," & Current_Point.Y'Image & ">:" & Dir'Image
+                                      & " Expected: " & Expected_Board(X, Y, Dir)'Image & ", Actual: " & Get_Connector(Test_Board, Current_Point, Dir)'Image);
+            end loop;
+          end;
+        end loop;
+      end loop;
+    end;
+  begin
+    declare
+      Rotated_Stone: constant Board_10.Rotated_Stone_T := (Test_Stone, 0);
+      Expected_Board: constant Board_State  := (
+        5 => (
+          3 => (North => Open, West => Closed, Others => Inner),
+          4 => (South => Open, West => Closed, Others => Inner),
+          Others => (Others => Empty)),
+        6 => (
+          3 => (North => Closed, Others => Inner),
+          4 => (South => Closed, Others => Inner),
+          Others => (Others => Empty)),
+        7 => (
+          3 => (North => Closed, East => Closed, Others => Inner),
+          4 => (South => Closed, East => Open, Others => Inner),
+          Others => (Others => Empty)),
+        Others => (Others => (Others => Empty)));
+    begin
+      Test_Occupation_Case(Rotated_Stone, Expected_Board);
+    end;
 
-  --  begin
-  --    AUnit.Assertions.Assert (Board_10.Get_Width (Test_Stone) = 4,
-  --                             "Checking width of stone");
+    declare
+      Rotated_Stone: constant Board_10.Rotated_Stone_T := (Test_Stone, 1);
+      Expected_Board: constant Board_State  := (
+        5 => (
+          3 => (North => Closed, West => Open, Others => Inner),
+          4 => (West => Closed, Others => Inner),
+          5 => (West => Closed, South => Open, Others => Inner),
+          Others => (Others => Empty)),
+        6 => (
+          3 => (North => Closed, East => Open, Others => Inner),
+          4 => (East => Closed, Others => Inner),
+          5 => (East => Closed, South => Closed, Others => Inner),
+          Others => (Others => Empty)),
+        Others => (Others => (Others => Empty)));
+    begin
+      Test_Occupation_Case(Rotated_Stone, Expected_Board);
+    end;
 
-  --    AUnit.Assertions.Assert (Board_10.Get_Height (Test_Stone) = 2,
-  --                             "Checking height of stone");
+    declare
+      Rotated_Stone: constant Board_10.Rotated_Stone_T := (Test_Stone, 2);
+      Expected_Board: constant Board_State  := (
+        5 => (
+          3 => (North => Closed, West => Open, Others => Inner),
+          4 => (South => Closed, West => Closed, Others => Inner),
+          Others => (Others => Empty)),
+        6 => (
+          3 => (North => Closed, Others => Inner),
+          4 => (South => Closed, Others => Inner),
+          Others => (Others => Empty)),
+        7 => (
+          3 => (North => Open, East => Closed, Others => Inner),
+          4 => (South => Open, East => Closed, Others => Inner),
+          Others => (Others => Empty)),
+        Others => (Others => (Others => Empty)));
+    begin
+      Test_Occupation_Case(Rotated_Stone, Expected_Board);
+    end;
 
-  --    Board_10.Place (Test_Board, Test_Stone, (4, 4));
-
-  --    for X in Occupied_Places'Range (1) loop
-  --      for Y in Occupied_Places'Range (2) loop
-  --        if Occupied_Places (X, Y) then
-  --          AUnit.Assertions.Assert (Board_10.Is_Occupied (Test_Board, (X, Y)),
-  --                                   "Checking occupied Field <"
-  --                                   & X'Image & "," & Y'Image & ">");
-  --        else
-  --          AUnit.Assertions.Assert (Not Board_10.Is_Occupied (Test_Board, (X, Y)),
-  --                                   "Checking unoccupied Field <"
-  --                                   & X'Image & "," & Y'Image & ">");
-  --        end if;
-  --      end loop;
-  --    end loop;
-
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (4, 4), North) = Open,
-  --                             "Checking Connector <4, 4, North>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (4, 4), East) = Inner,
-  --                             "Checking Connector <4, 4, East>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (4, 4), South) = Inner,
-  --                             "Checking Connector <4, 4, South>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (4, 4), West) = Open,
-  --                             "Checking Connector <4, 4, West>");
-
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (5, 4), North) = Closed,
-  --                             "Checking Connector <5, 4, North>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (5, 4), East) = Inner,
-  --                             "Checking Connector <5, 4, East>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (5, 4), South) = Inner,
-  --                             "Checking Connector <5, 4, South>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (5, 4), West) = Inner,
-  --                             "Checking Connector <5, 4, West>");
-
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (6, 4), North) = Closed,
-  --                             "Checking Connector <6, 4, North>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (6, 4), East) = Inner,
-  --                             "Checking Connector <6, 4, East>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (6, 4), South) = Inner,
-  --                             "Checking Connector <6, 4, South>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (6, 4), West) = Inner,
-  --                             "Checking Connector <6, 4, West>");
-
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (7, 4), North) = Closed,
-  --                             "Checking Connector <7, 4, North>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (7, 4), East) = Closed,
-  --                             "Checking Connector <7, 4, East>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (7, 4), South) = Inner,
-  --                             "Checking Connector <7, 4, South>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (7, 4), West) = Inner,
-  --                             "Checking Connector <7, 4, West>");
-
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (4, 5), North) = Inner,
-  --                             "Checking Connector <4, 5, North>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (4, 5), East) = Inner,
-  --                             "Checking Connector <4, 5, East>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (4, 5), South) = Closed,
-  --                             "Checking Connector <4, 5, South>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (4, 5), West) = Closed,
-  --                             "Checking Connector <4, 5, West>");
-
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (5, 5), North) = Inner,
-  --                             "Checking Connector <5, 5, North>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (5, 5), East) = Inner,
-  --                             "Checking Connector <5, 5, East>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (5, 5), South) = Open,
-  --                             "Checking Connector <5, 5, South>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (5, 5), West) = Inner,
-  --                             "Checking Connector <5, 5, West>");
-
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (6, 5), North) = Inner,
-  --                             "Checking Connector <6, 5, North>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (6, 5), East) = Inner,
-  --                             "Checking Connector <6, 5, East>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (6, 5), South) = Closed,
-  --                             "Checking Connector <6, 5, South>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (6, 5), West) = Inner,
-  --                             "Checking Connector <6, 5, West>");
-
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (7, 5), North) = Inner,
-  --                             "Checking Connector <7, 5, North>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (7, 5), East) = Open,
-  --                             "Checking Connector <7, 5, East>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (7, 5), South) = Closed,
-  --                             "Checking Connector <7, 5, South>");
-  --    AUnit.Assertions.Assert (Board_10.Get_Connector (Test_Board,
-  --                                                     (7, 5), West) = Inner,
-  --                             "Checking Connector <7, 5, West>");
-  --  end Test_Place;
+    declare
+      Rotated_Stone: constant Board_10.Rotated_Stone_T := (Test_Stone, 3);
+      Expected_Board: constant Board_State  := (
+        5 => (
+          3 => (North => Closed, West => Closed, Others => Inner),
+          4 => (West => Closed, Others => Inner),
+          5 => (West => Open, South => Closed, Others => Inner),
+          Others => (Others => Empty)),
+        6 => (
+          3 => (North => Open, East => Closed, Others => Inner),
+          4 => (East => Closed, Others => Inner),
+          5 => (East => Open, South => Closed, Others => Inner),
+          Others => (Others => Empty)),
+        Others => (Others => (Others => Empty)));
+    begin
+      Test_Occupation_Case(Rotated_Stone, Expected_Board);
+    end;
+  end Test_Place;
 
   --  procedure Test_Covers (T: in out AUnit.Test_Cases.Test_Case'Class) is
   --    use Board_10;
@@ -227,7 +189,7 @@ package body Board_Test is
     Expected_Results: constant array (X_Coordinate, Y_Coordinate) of Boolean := (
       9 => (Others => False),
       10 => (Others => False),
-      Others => (Others => True));
+      Others => (10 => False, Others => True));
   begin
     for X in Expected_Results'Range(1) loop
       for Y in Expected_Results'Range(2) loop

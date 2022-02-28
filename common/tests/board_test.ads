@@ -8,7 +8,7 @@ package Board_Test is
 
   function Name (T: Board_Test) return AUnit.Message_String;
 
-  --  procedure Test_Place (T: in out AUnit.Test_Cases.Test_Case'Class);
+  procedure Test_Place (T: in out AUnit.Test_Cases.Test_Case'Class);
   --  procedure Test_Covers (T: in out AUnit.Test_Cases.Test_Case'Class);
   --  procedure Test_Connectives (T: in out AUnit.Test_Cases.Test_Case'Class);
   procedure Test_Fits_Dimensions (T: in out AUnit.Test_Cases.Test_Case'Class);
