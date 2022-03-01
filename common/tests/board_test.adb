@@ -10,9 +10,9 @@ package body Board_Test is
    begin
       Register_Routine (T, Test_Place'Access, "Test placement of stone");
       Register_Routine (T, Test_Covers'Access, "Test cover of stone");
-      --  Register_Routine (T, Test_Connectives'Access, "Test connectives of stone");
+      Register_Routine (T, Test_Connectives'Access, "Test connectives of stone");
       Register_Routine (T, Test_Fits_Dimensions'Access, "Test dimentional fit of stone");
-      --  Register_Routine (T, Test_Connects'Access, "Test connections of stone");
+      Register_Routine (T, Test_Connects'Access, "Test connections of stone");
       --  Register_Routine (T, Test_Valid_Moves'Access, "Test valid moves for stone on board");
    end Register_Tests;
 
@@ -195,34 +195,95 @@ package body Board_Test is
     end;
   end Test_Covers;
 
-  --  procedure Test_Connectives (T: in out AUnit.Test_Cases.Test_Case'Class) is
-  --    use Board_10;
+  procedure Test_Connectives (T: in out AUnit.Test_Cases.Test_Case'Class) is
+    use Board_10;
 
-  --    Stone: constant Stone_T := Stone_From_Borders(
-  --      Border_T'(1 => Closed, 2 => Open, 3 => Closed),
-  --      Border_T'(1 => Closed, 2 => Open),
-  --      Border_T'(1 => Open, 2 => Open, 3 => Closed),
-  --      Border_T'(1 => Closed, 2 => Open));
+    Stone: constant Stone_T := Stone_From_Borders(
+      (1 => Closed, 2 => Open, 3 => Closed),
+      (1 => Closed, 2 => Open),
+      (1 => Open, 2 => Open, 3 => Closed),
+      (1 => Closed, 2 => Open));
 
-  --    Placement: constant Point_T := (1, 3);
-  --    Result: constant Connective_Sets.Set := Connectives(Stone, Placement);
+    Placement: constant Point_T := (1, 3);
 
-  --    Expected: Connective_Sets.Set;
-  --  begin
-  --    Connective_Sets.Include(Expected, ((1, 3), North));
-  --    Connective_Sets.Include(Expected, ((2, 3), North));
-  --    Connective_Sets.Include(Expected, ((3, 3), North));
-  --    Connective_Sets.Include(Expected, ((3, 3), East));
-  --    Connective_Sets.Include(Expected, ((3, 4), East));
-  --    Connective_Sets.Include(Expected, ((1, 4), South));
-  --    Connective_Sets.Include(Expected, ((2, 4), South));
-  --    Connective_Sets.Include(Expected, ((3, 4), South));
-  --    Connective_Sets.Include(Expected, ((1, 3), West));
-  --    Connective_Sets.Include(Expected, ((1, 4), West));
+  begin
+    declare
+      Result: constant Connective_Sets.Set := Connectives((Stone, 0), Placement);
+      Expected: Connective_Sets.Set;
+    begin
+      Connective_Sets.Include(Expected, ((1, 3), North));
+      Connective_Sets.Include(Expected, ((2, 3), North));
+      Connective_Sets.Include(Expected, ((3, 3), North));
+      Connective_Sets.Include(Expected, ((3, 3), East));
+      Connective_Sets.Include(Expected, ((3, 4), East));
+      Connective_Sets.Include(Expected, ((1, 4), South));
+      Connective_Sets.Include(Expected, ((2, 4), South));
+      Connective_Sets.Include(Expected, ((3, 4), South));
+      Connective_Sets.Include(Expected, ((1, 3), West));
+      Connective_Sets.Include(Expected, ((1, 4), West));
 
-  --    AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(Result, Expected),
-  --                             "Check connectives of a stone.");
-  --  end Test_Connectives;
+      AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(Result, Expected),
+                               "Check connectives of a stone.");
+    end;
+
+    declare
+      Result: constant Connective_Sets.Set := Connectives((Stone, 2), Placement);
+      Expected: Connective_Sets.Set;
+    begin
+      Connective_Sets.Include(Expected, ((1, 3), North));
+      Connective_Sets.Include(Expected, ((2, 3), North));
+      Connective_Sets.Include(Expected, ((3, 3), North));
+      Connective_Sets.Include(Expected, ((3, 3), East));
+      Connective_Sets.Include(Expected, ((3, 4), East));
+      Connective_Sets.Include(Expected, ((1, 4), South));
+      Connective_Sets.Include(Expected, ((2, 4), South));
+      Connective_Sets.Include(Expected, ((3, 4), South));
+      Connective_Sets.Include(Expected, ((1, 3), West));
+      Connective_Sets.Include(Expected, ((1, 4), West));
+
+      AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(Result, Expected),
+                               "Check connectives of a stone.");
+    end;
+
+    declare
+      Result: constant Connective_Sets.Set := Connectives((Stone, 1), Placement);
+      Expected: Connective_Sets.Set;
+    begin
+      Connective_Sets.Include(Expected, ((1, 3), North));
+      Connective_Sets.Include(Expected, ((2, 3), North));
+      Connective_Sets.Include(Expected, ((2, 3), East));
+      Connective_Sets.Include(Expected, ((2, 4), East));
+      Connective_Sets.Include(Expected, ((2, 5), East));
+      Connective_Sets.Include(Expected, ((2, 5), South));
+      Connective_Sets.Include(Expected, ((1, 5), South));
+      Connective_Sets.Include(Expected, ((1, 5), West));
+      Connective_Sets.Include(Expected, ((1, 4), West));
+      Connective_Sets.Include(Expected, ((1, 3), West));
+
+      AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(Result, Expected),
+                               "Check connectives of a stone.");
+    end;
+
+    declare
+      Result: constant Connective_Sets.Set := Connectives((Stone, 3), Placement);
+      Expected: Connective_Sets.Set;
+    begin
+      Connective_Sets.Include(Expected, ((1, 3), North));
+      Connective_Sets.Include(Expected, ((2, 3), North));
+      Connective_Sets.Include(Expected, ((2, 3), East));
+      Connective_Sets.Include(Expected, ((2, 4), East));
+      Connective_Sets.Include(Expected, ((2, 5), East));
+      Connective_Sets.Include(Expected, ((2, 5), South));
+      Connective_Sets.Include(Expected, ((1, 5), South));
+      Connective_Sets.Include(Expected, ((1, 5), West));
+      Connective_Sets.Include(Expected, ((1, 4), West));
+      Connective_Sets.Include(Expected, ((1, 3), West));
+
+      AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(Result, Expected),
+                               "Check connectives of a stone.");
+    end;
+
+  end Test_Connectives;
 
   procedure Test_Fits_Dimensions (T: in out AUnit.Test_Cases.Test_Case'Class) is
     use Board_10;
@@ -240,121 +301,28 @@ package body Board_Test is
     end loop;
   end Test_Fits_Dimensions;
 
-  --  procedure Test_Connects (T: in out AUnit.Test_Cases.Test_Case'Class) is
-  --    use Board_10;
+  procedure Test_Connects (T: in out AUnit.Test_Cases.Test_Case'Class) is
+    use Board_10;
 
-  --    Board: Board_T;
+    Board: Board_T;
 
-  --    Placed_Stone: constant Stone_T := Stone_From_Borders(
-  --      Border_T'(1 => Closed, 2 => Open, 3 => Closed),
-  --      Border_T'(1 => Closed, 2 => Open, 3 => Open),
-  --      Border_T'(1 => Open, 2 => Open, 3 => Closed),
-  --      Border_T'(1 => Closed, 2 => Open, 3 => Closed));
+    Placed_Stone: constant Stone_T := Stone_From_Borders(
+      (1 => Closed, 2 => Open, 3 => Closed),
+      (1 => Closed, 2 => Open),
+      (1 => Open, 2 => Open, 3 => Closed),
+      (1 => Closed, 2 => Open));
 
-  --    Placement: Point_T := (4, 3);
+    Placement: Point_T := (4, 3);
 
-  --    Stone: constant Stone_T := Stone_From_Borders(
-  --      Border_T'(1 => Closed, 2 => Open, 3 => Closed),
-  --      Border_T'(1 => Closed, 2 => Open),
-  --      Border_T'(1 => Open, 2 => Open, 3 => Closed),
-  --      Border_T'(1 => Closed, 2 => Open));
-
-  --    First_Placement: constant Point_T := (3, 1);
-  --    First_Expectation_Consistent: Connective_Sets.Set;
-  --    First_Expectation_Increasing: Connective_Sets.Set;
-
-  --    Second_Placement: constant Point_T := (1, 3);
-  --    Second_Expectation_Consistent: Connective_Sets.Set;
-  --    Second_Expectation_Increasing: Connective_Sets.Set;
-
-  --    Third_Placement: constant Point_T := (7, 6);
-  --    Third_Expectation_Consistent: Connective_Sets.Set;
-  --    Third_Expectation_Increasing: Connective_Sets.Set;
-
-  --    Fourth_Placement: constant Point_T := (7, 4);
-  --    Fourth_Expectation_Consistent: Connective_Sets.Set;
-  --    Fourth_Expectation_Increasing: Connective_Sets.Set;
-
-  --    Fifth_Placement: constant Point_T := (4, 6);
-  --    Fifth_Expectation_Consistent: Connective_Sets.Set;
-  --    Fifth_Expectation_Increasing: Connective_Sets.Set;
-
-  --  begin
-  --    Place(Board, Placed_Stone, Placement);
-
-  --    First_Expectation_Consistent := Connectives(Stone, First_Placement);
-  --    Connective_Sets.Delete(First_Expectation_Consistent, ((4, 2), South));
-  --    First_Expectation_Increasing := Connective_Sets.To_Set(((5, 2), South));
-
-  --    Second_Expectation_Consistent := Connectives(Stone, Second_Placement);
-  --    Second_Expectation_Increasing := Connective_Sets.To_Set(((3, 4), East));
-
-  --    Third_Expectation_Consistent := Connectives(Stone, Third_Placement);
-  --    Third_Expectation_Increasing := Connective_Sets.Empty_set;
-
-  --    Fourth_Expectation_Consistent := Connectives(Stone, Fourth_Placement);
-  --    Connective_Sets.Delete(Fourth_Expectation_Consistent, ((7, 5), West));
-  --    Fourth_Expectation_Increasing := Connective_Sets.To_Set(((7, 4), West));
-
-  --    Fifth_Expectation_Consistent := Connectives(Stone, Fifth_Placement);
-  --    Connective_Sets.Delete(Fifth_Expectation_Consistent, ((6, 6), North));
-  --    Fifth_Expectation_Increasing := Connective_Sets.To_Set(((5, 6), North));
-
-  --    declare
-  --      Consistent: Connective_Sets.Set;
-  --      Increasing: Connective_Sets.Set;
-  --    begin
-  --      Connects(Board, Stone, First_Placement, Consistent, Increasing);
-  --      AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(First_Expectation_Consistent, Consistent),
-  --                               "Consistent for first placement");
-  --      AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(First_Expectation_Increasing, Increasing),
-  --                               "Increasing for first placement");
-  --    end;
-
-  --    declare
-  --      Consistent: Connective_Sets.Set;
-  --      Increasing: Connective_Sets.Set;
-  --    begin
-  --      Connects(Board, Stone, Second_Placement, Consistent, Increasing);
-  --      AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(Second_Expectation_Consistent, Consistent),
-  --                               "Consistent for Second placement");
-  --      AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(Second_Expectation_Increasing, Increasing),
-  --                               "Increasing for Second placement");
-  --    end;
-
-  --    declare
-  --      Consistent: Connective_Sets.Set;
-  --      Increasing: Connective_Sets.Set;
-  --    begin
-  --      Connects(Board, Stone, Third_Placement, Consistent, Increasing);
-  --      AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(Third_Expectation_Consistent, Consistent),
-  --                               "Consistent for Third placement");
-  --      AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(Third_Expectation_Increasing, Increasing),
-  --                               "Increasing for Third placement");
-  --    end;
-
-  --    declare
-  --      Consistent: Connective_Sets.Set;
-  --      Increasing: Connective_Sets.Set;
-  --    begin
-  --      Connects(Board, Stone, Fourth_Placement, Consistent, Increasing);
-  --      AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(Fourth_Expectation_Consistent, Consistent),
-  --                               "Consistent for Fourth placement");
-  --      AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(Fourth_Expectation_Increasing, Increasing),
-  --                               "Increasing for Fourth placement");
-  --    end;
-
-  --    declare
-  --      Consistent: Connective_Sets.Set;
-  --      Increasing: Connective_Sets.Set;
-  --    begin
-  --      Connects(Board, Stone, Fifth_Placement, Consistent, Increasing);
-  --      AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(Fifth_Expectation_Consistent, Consistent),
-  --                               "Consistent for Fifth placement");
-  --      AUnit.Assertions.Assert (Connective_Sets.Equivalent_Sets(Fifth_Expectation_Increasing, Increasing),
-  --                               "Increasing for Fifth placement");
-  --    end;
-  --  end Test_Connects;
+    Stone: constant Stone_T := Stone_From_Borders(
+      (1 => Closed, 2 => Open, 3 => Closed),
+      (1 => Closed, 2 => Open),
+      (1 => Open, 2 => Open, 3 => Closed),
+      (1 => Closed, 2 => Open));
+  begin
+    Place(Board, (Placed_Stone, 0), Placement);
+    AUnit.Assertions.Assert(False, "TODO: Implement tests");
+  end Test_Connects;
 
   -- procedure Test_Valid_Moves(T: in out AUnit.Test_Cases.Test_Case'Class)
   -- is

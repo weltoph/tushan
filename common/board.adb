@@ -182,31 +182,31 @@ package body Board is
     return Result;
   end Covers;
 
-  --  function Connectives (Stone: In Rotated_Stone_T; Point: In Point_T) return Connective_Sets.Set is
-  --    Result: Connective_Sets.Set;
-  --  begin
-  --    if Stone.Rotation = 0 or Stone.Rotation = 2 then
-  --      for X in Stone_X_Coordinate loop
-  --        Connective_Sets.Include(Result, ((Point.X + X - Stone_X_Coordinate'First, Point.Y), North));
-  --        Connective_Sets.Include(Result, ((Point.X + X - Stone_X_Coordinate'First, Point.Y + Stone_Y_Coordinate'Last - Stone_Y_Coordinate'First), South));
-  --      end loop;
-  --      for Y in Stone_Y_Coordinate loop
-  --        Connective_Sets.Include (Result, ((Point.X, Point.Y + Y - Stone_Y_Coordinate'First), West));
-  --        Connective_Sets.Include (Result, ((Point.X + Stone_X_Coordinate'Last - Stone_X_Coordinate'First, Point.Y + Y - Stone_Y_Coordinate'First), East));
-  --      end loop;
-  --      return Result;
-  --    else
-  --      for X in Stone_X_Coordinate loop
-  --        Connective_Sets.Include(Result, ((Point.X, Point.Y + X - Stone_X_Coordinate'First), West));
-  --        Connective_Sets.Include(Result, ((Point.X + Stone_Y_Coordinate'Last - Stone_Y_Coordinate'First, Point.Y + X - Stone_X_Coordinate'First), East));
-  --      end loop;
-  --      for Y in Stone_Y_Coordinate loop
-  --        Connective_Sets.Include (Result, ((Point.X + Y - Stone_Y_Coordinate'First, Point.Y), North));
-  --        Connective_Sets.Include (Result, ((Point.X + Y - Stone_Y_Coordinate'First, Point.Y + Stone_Y_Coordinate'Last - Stone_Y_Coordinate'First), South));
-  --      end loop;
-  --      return Result;
-  --    end if;
-  --  end Connectives;
+  function Connectives (Stone: In Rotated_Stone_T; Point: In Point_T) return Connective_Sets.Set is
+    Result: Connective_Sets.Set;
+  begin
+    if Stone.Rotation = 0 or Stone.Rotation = 2 then
+      for X in Stone_X_Coordinate loop
+        Connective_Sets.Include(Result, ((Point.X + X - Stone_X_Coordinate'First, Point.Y), North));
+        Connective_Sets.Include(Result, ((Point.X + X - Stone_X_Coordinate'First, Point.Y + Stone_Y_Coordinate'Last - Stone_Y_Coordinate'First), South));
+      end loop;
+      for Y in Stone_Y_Coordinate loop
+        Connective_Sets.Include (Result, ((Point.X, Point.Y + Y - Stone_Y_Coordinate'First), West));
+        Connective_Sets.Include (Result, ((Point.X + Stone_X_Coordinate'Last - Stone_X_Coordinate'First, Point.Y + Y - Stone_Y_Coordinate'First), East));
+      end loop;
+      return Result;
+    else
+      for X in Stone_X_Coordinate loop
+        Connective_Sets.Include(Result, ((Point.X, Point.Y + X - Stone_X_Coordinate'First), West));
+        Connective_Sets.Include(Result, ((Point.X + Stone_Y_Coordinate'Last - Stone_Y_Coordinate'First, Point.Y + X - Stone_X_Coordinate'First), East));
+      end loop;
+      for Y in Stone_Y_Coordinate loop
+        Connective_Sets.Include (Result, ((Point.X + Y - Stone_Y_Coordinate'First, Point.Y), North));
+        Connective_Sets.Include (Result, ((Point.X + Y - Stone_Y_Coordinate'First, Point.Y + Stone_X_Coordinate'Last - Stone_X_Coordinate'First), South));
+      end loop;
+      return Result;
+    end if;
+  end Connectives;
 
   function Fits_Dimensions (Rotation: In Rotation_T; Point: In Point_T) return Boolean is
     Max_Width: constant X_Coordinate := Width - Point.X + 1;
