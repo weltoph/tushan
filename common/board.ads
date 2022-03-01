@@ -107,10 +107,11 @@ package Board is
                    Stone: In Rotated_Stone_T;
                    Placement: In Point_T);
 
-  --  function Covers (Stone: In Rotated_Stone_T; Point: In Point_T) return Point_Sets.Set;
+  function Covers(Point: In Point_T; Rotation: In Rotation_T) return Point_Sets.Set
+    with Pre => Fits_Dimensions (Rotation, Point);
 
-  function Connectives (Stone: In Rotated_Stone_T; Point: In Point_T) return Connective_Sets.Set
-    with Pre => Fits_Dimensions (Stone.Rotation, Point);
+  --  function Connectives (Stone: In Rotated_Stone_T; Point: In Point_T) return Connective_Sets.Set
+  --    with Pre => Fits_Dimensions (Stone.Rotation, Point);
 
   function Fits_Dimensions (Rotation: In Rotation_T; Point: In Point_T) return Boolean;
 

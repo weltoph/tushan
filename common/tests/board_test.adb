@@ -9,8 +9,7 @@ package body Board_Test is
       use AUnit.Test_Cases.Registration;
    begin
       Register_Routine (T, Test_Place'Access, "Test placement of stone");
-      --  Register_Routine (T, Test_Rotation'Access, "Test rotation of stone");
-      --  Register_Routine (T, Test_Covers'Access, "Test cover of stone");
+      Register_Routine (T, Test_Covers'Access, "Test cover of stone");
       --  Register_Routine (T, Test_Connectives'Access, "Test connectives of stone");
       Register_Routine (T, Test_Fits_Dimensions'Access, "Test dimentional fit of stone");
       --  Register_Routine (T, Test_Connects'Access, "Test connections of stone");
@@ -33,7 +32,7 @@ package body Board_Test is
     Placement: constant Board_10.Point_T := (5, 3);
     type Board_State is array (Board_10.X_Coordinate, Board_10.Y_Coordinate, Direction_T) of Connector_T;
 
-    procedure Test_Occupation_Case(Rotated_Stone: In Board_10.Rotated_Stone_T; Expected_Board: In Board_State) is
+    procedure Test_Case(Rotated_Stone: In Board_10.Rotated_Stone_T; Expected_Board: In Board_State) is
       Test_Board: Board_10.Board_T;
     begin
       Place(Test_Board, Rotated_Stone, Placement);
@@ -69,7 +68,7 @@ package body Board_Test is
           Others => (Others => Empty)),
         Others => (Others => (Others => Empty)));
     begin
-      Test_Occupation_Case(Rotated_Stone, Expected_Board);
+      Test_Case(Rotated_Stone, Expected_Board);
     end;
 
     declare
@@ -87,7 +86,7 @@ package body Board_Test is
           Others => (Others => Empty)),
         Others => (Others => (Others => Empty)));
     begin
-      Test_Occupation_Case(Rotated_Stone, Expected_Board);
+      Test_Case(Rotated_Stone, Expected_Board);
     end;
 
     declare
@@ -107,7 +106,7 @@ package body Board_Test is
           Others => (Others => Empty)),
         Others => (Others => (Others => Empty)));
     begin
-      Test_Occupation_Case(Rotated_Stone, Expected_Board);
+      Test_Case(Rotated_Stone, Expected_Board);
     end;
 
     declare
@@ -125,34 +124,76 @@ package body Board_Test is
           Others => (Others => Empty)),
         Others => (Others => (Others => Empty)));
     begin
-      Test_Occupation_Case(Rotated_Stone, Expected_Board);
+      Test_Case(Rotated_Stone, Expected_Board);
     end;
   end Test_Place;
 
-  --  procedure Test_Covers (T: in out AUnit.Test_Cases.Test_Case'Class) is
-  --    use Board_10;
+  procedure Test_Covers (T: in out AUnit.Test_Cases.Test_Case'Class) is
+    use Board_10;
 
-  --    Stone: constant Stone_T := Stone_From_Borders(
-  --      Border_T'(1 => Closed, 2 => Open, 3 => Closed),
-  --      Border_T'(1 => Closed, 2 => Open),
-  --      Border_T'(1 => Open, 2 => Open, 3 => Closed),
-  --      Border_T'(1 => Closed, 2 => Open));
+    Placement: constant Point_T := (1, 3);
 
-  --    Placement: constant Point_T := (1, 3);
-  --    Cover: constant Point_Sets.Set := Covers(Stone, Placement);
+  begin
+    declare
+      Expected: Point_Sets.Set;
+      Rotation: constant Rotation_T := 0;
+      Cover: constant Point_Sets.Set := Covers(Placement, Rotation);
+    begin
+      Point_Sets.Include(Expected, (1, 3));
+      Point_Sets.Include(Expected, (2, 3));
+      Point_Sets.Include(Expected, (3, 3));
+      Point_Sets.Include(Expected, (1, 4));
+      Point_Sets.Include(Expected, (2, 4));
+      Point_Sets.Include(Expected, (3, 4));
+      AUnit.Assertions.Assert(Point_Sets.Equivalent_Sets(Cover, Expected),
+                              "Check cover of a stone.");
+    end;
 
-  --    Expected: Point_Sets.Set;
-  --  begin
-  --    Point_Sets.Include(Expected, (1, 3));
-  --    Point_Sets.Include(Expected, (2, 3));
-  --    Point_Sets.Include(Expected, (3, 3));
-  --    Point_Sets.Include(Expected, (1, 4));
-  --    Point_Sets.Include(Expected, (2, 4));
-  --    Point_Sets.Include(Expected, (3, 4));
+    declare
+      Expected: Point_Sets.Set;
+      Rotation: constant Rotation_T := 1;
+      Cover: constant Point_Sets.Set := Covers(Placement, Rotation);
+    begin
+      Point_Sets.Include(Expected, (1, 3));
+      Point_Sets.Include(Expected, (1, 4));
+      Point_Sets.Include(Expected, (1, 5));
+      Point_Sets.Include(Expected, (2, 3));
+      Point_Sets.Include(Expected, (2, 4));
+      Point_Sets.Include(Expected, (2, 5));
+      AUnit.Assertions.Assert(Point_Sets.Equivalent_Sets(Cover, Expected),
+                              "Check cover of a stone.");
+    end;
 
-  --    AUnit.Assertions.Assert(Point_Sets.Equivalent_Sets(Cover, Expected),
-  --                            "Check cover of a stone.");
-  --  end Test_Covers;
+    declare
+      Expected: Point_Sets.Set;
+      Rotation: constant Rotation_T := 2;
+      Cover: constant Point_Sets.Set := Covers(Placement, Rotation);
+    begin
+      Point_Sets.Include(Expected, (1, 3));
+      Point_Sets.Include(Expected, (2, 3));
+      Point_Sets.Include(Expected, (3, 3));
+      Point_Sets.Include(Expected, (1, 4));
+      Point_Sets.Include(Expected, (2, 4));
+      Point_Sets.Include(Expected, (3, 4));
+      AUnit.Assertions.Assert(Point_Sets.Equivalent_Sets(Cover, Expected),
+                              "Check cover of a stone.");
+    end;
+
+    declare
+      Expected: Point_Sets.Set;
+      Rotation: constant Rotation_T := 3;
+      Cover: constant Point_Sets.Set := Covers(Placement, Rotation);
+    begin
+      Point_Sets.Include(Expected, (1, 3));
+      Point_Sets.Include(Expected, (2, 3));
+      Point_Sets.Include(Expected, (1, 4));
+      Point_Sets.Include(Expected, (2, 4));
+      Point_Sets.Include(Expected, (1, 5));
+      Point_Sets.Include(Expected, (2, 5));
+      AUnit.Assertions.Assert(Point_Sets.Equivalent_Sets(Cover, Expected),
+                              "Check cover of a stone.");
+    end;
+  end Test_Covers;
 
   --  procedure Test_Connectives (T: in out AUnit.Test_Cases.Test_Case'Class) is
   --    use Board_10;
