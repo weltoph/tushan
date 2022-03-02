@@ -32,10 +32,10 @@ package body Board_Test is
     Placement: constant Board_10.Point_T := (5, 3);
     type Board_State is array (Board_10.X_Coordinate, Board_10.Y_Coordinate, Direction_T) of Connector_T;
 
-    procedure Test_Case(Rotated_Stone: In Board_10.Rotated_Stone_T; Expected_Board: In Board_State) is
+    procedure Test_Case(Stone: In Board_10.Stone_T; Expected_Board: In Board_State) is
       Test_Board: Board_10.Board_T;
     begin
-      Place(Test_Board, Rotated_Stone, Placement);
+      Place(Test_Board, Stone, Placement);
       for X in Board_10.X_Coordinate loop
         for Y in Board_10.Y_Coordinate loop
           declare
@@ -52,7 +52,7 @@ package body Board_Test is
     end;
   begin
     declare
-      Rotated_Stone: constant Board_10.Rotated_Stone_T := (Test_Stone, 0);
+      Stone: constant Board_10.Stone_T := Test_Stone;
       Expected_Board: constant Board_State  := (
         5 => (
           3 => (North => Open, West => Closed, Others => Inner),
@@ -68,11 +68,11 @@ package body Board_Test is
           Others => (Others => Empty)),
         Others => (Others => (Others => Empty)));
     begin
-      Test_Case(Rotated_Stone, Expected_Board);
+      Test_Case(Stone, Expected_Board);
     end;
 
     declare
-      Rotated_Stone: constant Board_10.Rotated_Stone_T := (Test_Stone, 1);
+      Stone: constant Board_10.Stone_T := Rotate(Test_Stone, 1);
       Expected_Board: constant Board_State  := (
         5 => (
           3 => (North => Closed, West => Open, Others => Inner),
@@ -86,11 +86,11 @@ package body Board_Test is
           Others => (Others => Empty)),
         Others => (Others => (Others => Empty)));
     begin
-      Test_Case(Rotated_Stone, Expected_Board);
+      Test_Case(Stone, Expected_Board);
     end;
 
     declare
-      Rotated_Stone: constant Board_10.Rotated_Stone_T := (Test_Stone, 2);
+      Stone: constant Board_10.Stone_T := Rotate(Test_Stone, 2);
       Expected_Board: constant Board_State  := (
         5 => (
           3 => (North => Closed, West => Open, Others => Inner),
@@ -106,11 +106,11 @@ package body Board_Test is
           Others => (Others => Empty)),
         Others => (Others => (Others => Empty)));
     begin
-      Test_Case(Rotated_Stone, Expected_Board);
+      Test_Case(Stone, Expected_Board);
     end;
 
     declare
-      Rotated_Stone: constant Board_10.Rotated_Stone_T := (Test_Stone, 3);
+      Stone: constant Board_10.Stone_T := Rotate(Test_Stone, 3);
       Expected_Board: constant Board_State  := (
         5 => (
           3 => (North => Closed, West => Closed, Others => Inner),
@@ -124,7 +124,7 @@ package body Board_Test is
           Others => (Others => Empty)),
         Others => (Others => (Others => Empty)));
     begin
-      Test_Case(Rotated_Stone, Expected_Board);
+      Test_Case(Stone, Expected_Board);
     end;
   end Test_Place;
 
@@ -208,7 +208,7 @@ package body Board_Test is
 
   begin
     declare
-      Result: constant Connective_Sets.Set := Connectives((Stone, 0), Placement);
+      Result: constant Connective_Sets.Set := Connectives(Stone, Placement);
       Expected: Connective_Sets.Set;
     begin
       Connective_Sets.Include(Expected, ((1, 3), North));
@@ -227,7 +227,7 @@ package body Board_Test is
     end;
 
     declare
-      Result: constant Connective_Sets.Set := Connectives((Stone, 2), Placement);
+      Result: constant Connective_Sets.Set := Connectives(Rotate(Stone, 2), Placement);
       Expected: Connective_Sets.Set;
     begin
       Connective_Sets.Include(Expected, ((1, 3), North));
@@ -246,7 +246,7 @@ package body Board_Test is
     end;
 
     declare
-      Result: constant Connective_Sets.Set := Connectives((Stone, 1), Placement);
+      Result: constant Connective_Sets.Set := Connectives(Rotate(Stone, 1), Placement);
       Expected: Connective_Sets.Set;
     begin
       Connective_Sets.Include(Expected, ((1, 3), North));
@@ -265,7 +265,7 @@ package body Board_Test is
     end;
 
     declare
-      Result: constant Connective_Sets.Set := Connectives((Stone, 3), Placement);
+      Result: constant Connective_Sets.Set := Connectives(Rotate(Stone, 3), Placement);
       Expected: Connective_Sets.Set;
     begin
       Connective_Sets.Include(Expected, ((1, 3), North));
@@ -320,7 +320,7 @@ package body Board_Test is
       (1 => Open, 2 => Open, 3 => Closed),
       (1 => Closed, 2 => Open));
   begin
-    Place(Board, (Placed_Stone, 0), Placement);
+    Place(Board, Placed_Stone, Placement);
     AUnit.Assertions.Assert(False, "TODO: Implement tests");
   end Test_Connects;
 

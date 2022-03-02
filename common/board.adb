@@ -3,6 +3,67 @@ with Ada.Text_IO;
 
 package body Board is
 
+  function Get_Fields(Stone: Stone_T) return Rotated_Fields_T
+  is
+    function Rotate_Field (Field: In Field_T; Rotation: In Rotation_T) return Field_T is
+    begin
+      case Rotation is
+        when 0 => return Field;
+        when 1 => return (North => Field(West), East => Field(North), South => Field(East), West => Field(South));
+        when 2 => return (North => Field(South), East => Field(West), South => Field(North), West => Field(East));
+        when 3 => return (North => Field(East), East => Field(South), South => Field(West), West => Field(North));
+      end case;
+    end;
+  begin
+    case Stone.Rotation is
+      when 0 =>
+        declare
+          Result: Rotated_Fields_T(Stone_X_Coordinate, Stone_Y_Coordinate);
+        begin
+          for X in Stone_X_Coordinate loop
+            for Y in Stone_Y_Coordinate loop
+              Result(X, Y) := Stone.Fields(X, Y);
+            end loop;
+          end loop;
+          return Result;
+        end;
+      when 1 =>
+        declare
+          Result: Rotated_Fields_T(Stone_Y_Coordinate, Stone_X_Coordinate);
+        begin
+          for X in Stone_X_Coordinate loop
+            for Y in Stone_Y_Coordinate loop
+              Result(Stone_Y_Coordinate'Last - Y + Stone_Y_Coordinate'First, X) := Rotate_Field(Stone.Fields(X, Y), Stone.Rotation);
+            end loop;
+          end loop;
+          return Result;
+        end;
+      when 2 =>
+        declare
+          Result: Rotated_Fields_T(Stone_X_Coordinate, Stone_Y_Coordinate);
+        begin
+          for X in Stone_X_Coordinate loop
+            for Y in Stone_Y_Coordinate loop
+              Result(Stone_X_Coordinate'First + Stone_X_Coordinate'Last - X,
+                     Stone_Y_Coordinate'First + Stone_Y_Coordinate'Last - Y) := Rotate_Field(Stone.Fields(X, Y), Stone.Rotation);
+            end loop;
+          end loop;
+          return Result;
+        end;
+      when 3 =>
+        declare
+          Result: Rotated_Fields_T(Stone_Y_Coordinate, Stone_X_Coordinate);
+        begin
+          for X in Stone_X_Coordinate loop
+            for Y in Stone_Y_Coordinate loop
+              Result(Y, Stone_X_Coordinate'First + Stone_X_Coordinate'Last - X) := Rotate_Field(Stone.Fields(X, Y), Stone.Rotation);
+            end loop;
+          end loop;
+          return Result;
+        end;
+    end case;
+  end Get_Fields;
+
   function "<" (P1, P2: In Point_T) return Boolean is
   begin
     if P1.X < P2.X then
@@ -62,6 +123,17 @@ package body Board is
     return Result;
   end Middle;
 
+  function Rotate(Stone: In Stone_T; Rotation: In Rotation_T := 1) return Stone_T
+  is
+  begin
+    return (Stone.Fields, (Stone.Rotation + Rotation) mod 4);
+  end Rotate;
+
+  function Get_Rotation(Stone: In Stone_T) return Rotation_T is
+  begin
+    return Stone.Rotation;
+  end Get_Rotation;
+
   --  function Valid_Moves(Board: In Board_T; Stone: In Stone_T) return Moves_T
   --  is
   --    function Valid_Moves_For_Rotation(Stone: In Stone_T)
@@ -120,49 +192,17 @@ package body Board is
   --      3 => Valid_Moves_For_Rotation(RRRStone));
   --  end Valid_Moves;
 
-  procedure Place (Board: In Out Board_T;
-                   Stone: In Rotated_Stone_T;
-                   Placement: In Point_T) is
-    function Rotate_Field (Field: In Field_T; Rotation: In Rotation_T) return Field_T is
-    begin
-      case Rotation is
-        when 0 => return Field;
-        when 1 => return (North => Field(West), East => Field(North), South => Field(East), West => Field(South));
-        when 2 => return (North => Field(South), East => Field(West), South => Field(North), West => Field(East));
-        when 3 => return (North => Field(East), East => Field(South), South => Field(West), West => Field(North));
-      end case;
-    end;
+  procedure Place(Board: In Out Board_T;
+                  Stone: In Stone_T;
+                  Placement: In Point_T)
+  is
+    Fields: constant Rotated_Fields_T := Get_Fields(Stone);
   begin
-    case Stone.Rotation is
-      when 0 =>
-        for X in Stone_X_Coordinate loop
-          for Y in Stone_Y_Coordinate loop
-            Board(Placement.X + X - Stone_X_Coordinate'First,
-                  Placement.Y + Y - Stone_Y_Coordinate'First) := (True, Rotate_Field(Stone.Stone(X, Y), Stone.Rotation));
-          end loop;
-        end loop;
-      when 1 =>
-        for X in Stone_X_Coordinate loop
-          for Y in Stone_Y_Coordinate loop
-            Board(Placement.X + Stone_Y_Coordinate'Last - Y,
-                  Placement.Y + X - Stone_X_Coordinate'First) := (True, Rotate_Field(Stone.Stone(X, Y), Stone.Rotation));
-          end loop;
-        end loop;
-      when 2 =>
-        for X in Stone_X_Coordinate loop
-          for Y in Stone_Y_Coordinate loop
-            Board(Placement.X + Stone_X_Coordinate'Last - X,
-                  Placement.Y + Stone_Y_Coordinate'Last - Y) := (True, Rotate_Field(Stone.Stone(X, Y), Stone.Rotation));
-          end loop;
-        end loop;
-      when 3 =>
-        for X in Stone_X_Coordinate loop
-          for Y in Stone_Y_Coordinate loop
-            Board(Placement.X + Y - Stone_Y_Coordinate'First,
-                  Placement.Y + Stone_X_Coordinate'Last - X) := (True, Rotate_Field(Stone.Stone(X, Y), Stone.Rotation));
-          end loop;
-        end loop;
-    end case;
+   for X_Offset in Fields'Range(1) loop
+      for Y_Offset in Fields'Range(2) loop
+        Board(Placement.X + X_Offset - Fields'First(1), Placement.Y + Y_Offset - Fields'First(2)) := (True, Fields(X_Offset, Y_Offset));
+      end loop;
+    end loop;
   end Place;
 
   function Covers (Point: In Point_T; Rotation: In Rotation_T) return Point_Sets.Set is
@@ -182,7 +222,7 @@ package body Board is
     return Result;
   end Covers;
 
-  function Connectives (Stone: In Rotated_Stone_T; Point: In Point_T) return Connective_Sets.Set is
+  function Connectives (Stone: In Stone_T; Point: In Point_T) return Connective_Sets.Set is
     Result: Connective_Sets.Set;
   begin
     if Stone.Rotation = 0 or Stone.Rotation = 2 then
@@ -208,7 +248,7 @@ package body Board is
     end if;
   end Connectives;
 
-  function Fits_Dimensions (Rotation: In Rotation_T; Point: In Point_T) return Boolean is
+  function Fits_Dimensions(Rotation: In Rotation_T; Point: In Point_T) return Boolean is
     Max_Width: constant X_Coordinate := Width - Point.X + 1;
     Max_Height: constant Y_Coordinate := Height - Point.Y + 1;
   begin
@@ -219,95 +259,14 @@ package body Board is
     end if;
   end;
 
-  -- procedure Connects (Board: In Board_T;
-  --                     Stone: In Rotated_Stone_T;
-  --                     Placement: In Point_T;
-  --                     Consistent_Connectives: Out Connective_Sets.Set;
-  --                     Increasing_Connectives: Out Connective_Sets.Set) is
-  --   Northern_Border: constant Border_T := Get_Border (Stone.Stone, North);
-  --   Southern_Border: constant Border_T := Get_Border (Stone.Stone, South);
-  --   Eastern_Border: constant Border_T := Get_Border (Stone.Stone, East);
-  --   Western_Border: constant Border_T := Get_Border (Stone.Stone, West);
-  -- begin
-  --   for X in 1 .. Width loop
-  --     declare
-  --       N: constant Inner_Connector_T := Northern_Border (X);
-  --       ON: constant Connector_T := Get_Opposing_Connector (Board,
-  --                                                           (Placement.X + X - 1, Placement.Y),
-  --                                                           North);
-  --       S: constant Inner_Connector_T := Southern_Border (X);
-  --       OS: constant Connector_T := Get_Opposing_Connector (Board,
-  --                                                           (Width + Placement.X - X, Placement.Y + Height- 1),
-  --                                                           South);
-  --     begin
-  --       if N = Inner or ON = Inner or S = Inner or OS = Inner then
-  --         -- errorneous state
-  --         raise Board_Error
-  --           with "Stone presents <Inner> as connector of a border.";
-  --       end if;
-  --       if N = Open and ON = Closed then
-  --         null;
-  --       elsif N = Closed and ON = Open then
-  --         null;
-  --       else
-  --         Connective_Sets.Include(Consistent_Connectives, ((Placement.X + X - 1, Placement.Y), North));
-  --       end if;
-
-  --       if S = Open and OS = Closed then
-  --         null;
-  --       elsif S = Closed and OS = Open then
-  --         null;
-  --       else
-  --         Connective_Sets.Include(Consistent_Connectives, ((Width + Placement.X - X, Placement.Y + Height - 1), South));
-  --       end if;
-
-  --       if N = Open and ON = Open then
-  --         Connective_Sets.Include(Increasing_Connectives, ((Placement.X + X - 1, Placement.Y), North));
-  --       end if;
-  --       if S = Open and OS = Open then
-  --         Connective_Sets.Include(Increasing_Connectives, ((Width + Placement.X - X, Placement.Y + Height - 1), South));
-  --       end if;
-  --     end;
-  --   end loop;
-  --   for Y in 1 .. Height loop
-  --     declare
-  --       E: constant Inner_Connector_T := Eastern_Border (Y);
-  --       OE: constant Connector_T := Get_Opposing_Connector (Board,
-  --                                                           (Placement.X + Width - 1, Placement.Y + Y - 1),
-  --                                                           East);
-  --       W: constant Inner_Connector_T := Western_Border (Y);
-  --       OW: constant Connector_T := Get_Opposing_Connector (Board,
-  --                                                           (Placement.X, Placement.Y + Height - Y),
-  --                                                           West);
-  --     begin
-  --       if E = Inner or OE = Inner or W = Inner or OW = Inner then
-  --         -- errorneous state
-  --         raise Board_Error
-  --           with "Stone presents <Inner> as connector of a border.";
-  --       end if;
-  --       if E = Open and OE = Closed then
-  --         null;
-  --       elsif E = Closed and OE = Open then
-  --         null;
-  --       else
-  --         Connective_Sets.Include(Consistent_Connectives, ((Placement.X + Width - 1, Placement.Y + Y - 1), East));
-  --       end if;
-  --       if W = Open and OW = Closed then
-  --         null;
-  --       elsif W = Closed and OW = Open then
-  --         null;
-  --       else
-  --         Connective_Sets.Include(Consistent_Connectives, ((Placement.X, Placement.Y + Height - Y), West));
-  --       end if;
-  --       if E = Open and OE = Open then
-  --         Connective_Sets.Include(Increasing_Connectives, ((Placement.X + Width - 1, Placement.Y + Y - 1), East));
-  --       end if;
-  --       if W = Open and OW = Open then
-  --         Connective_Sets.Include(Increasing_Connectives, ((Placement.X, Placement.Y + Height - Y), West));
-  --       end if;
-  --     end;
-  --   end loop;
-  -- end Connects;
+  procedure Connects (Board: In Board_T;
+                      Stone: In Stone_T;
+                      Placement: In Point_T;
+                      Consistent_Connectives: Out Connective_Sets.Set;
+                      Increasing_Connectives: Out Connective_Sets.Set) is
+  begin
+    null;
+  end Connects;
 
   function Stone_From_Borders(
     Northern_Border: Horizontal_Border_T;
@@ -315,19 +274,19 @@ package body Board is
     Southern_Border: Horizontal_Border_T;
     Western_Border: Vertical_Border_T)
   return Stone_T is
-    Stone: Stone_T := (others => (others => (Others => Inner)));
+    Stone: Stone_T := ((others => (others => (Others => Inner))), 0);
   begin
     for X in Stone_X_Coordinate loop
-      Stone(X, Stone'First(2))(North) := Northern_Border(X);
+      Stone.Fields(X, Stone.Fields'First(2))(North) := Northern_Border(X);
     end loop;
     for X in reverse Stone_X_Coordinate loop
-      Stone(X, Stone'Last(2))(South) := Southern_Border(Stone'First(1) + Stone'Last(1) - X);
+      Stone.Fields(X, Stone.Fields'Last(2))(South) := Southern_Border(Stone.Fields'First(1) + Stone.Fields'Last(1) - X);
     end loop;
     for Y in Stone_Y_Coordinate loop
-      Stone(Stone'Last(1), Y)(East) := Eastern_Border(Y);
+      Stone.Fields(Stone.Fields'Last(1), Y)(East) := Eastern_Border(Y);
     end loop;
     for Y in reverse Stone_Y_Coordinate loop
-      Stone(Stone'First(1), Y)(West) := Western_Border(Stone'First(2) + Stone'Last(2) - Y);
+      Stone.Fields(Stone.Fields'First(1), Y)(West) := Western_Border(Stone.Fields'First(2) + Stone.Fields'Last(2) - Y);
     end loop;
     return Stone;
   end Stone_From_Borders;

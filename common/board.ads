@@ -89,37 +89,34 @@ package Board is
   -- stone.
   subtype Rotation_T is Natural range 0 .. 3;
 
-  type Rotated_Stone_T is record
-    Stone: Stone_T;
-    Rotation: Rotation_T;
-  end record;
+  function Rotate(Stone: In Stone_T; Rotation: In Rotation_T := 1) return Stone_T;
+  function Get_Rotation(Stone: In Stone_T) return Rotation_T;
 
   -- This type represents as a compound all valid moves for a given stone.
   type Moves_T is array (Rotation_T) of Point_Sets.Set;
 
-  -- Returns the four rotations of a stone and their respective valid
-  -- placements onto the board.
-  -- @param Board The board the stone is placed on.
-  -- @param Stone The stone to be placed.
-  --  function Valid_Moves(Board: In Board_T; Stone: In Stone_T) return Moves_T;
-
-  procedure Place (Board: In Out Board_T;
-                   Stone: In Rotated_Stone_T;
-                   Placement: In Point_T);
+  procedure Place(Board: In Out Board_T;
+                  Stone: In Stone_T;
+                  Placement: In Point_T)
+    with Pre => Fits_Dimensions(Get_Rotation(Stone), Placement)
+                and then Point_Sets.Is_Empty(
+                  Point_Sets.Intersection(
+                    Occupied_Points(Board),
+                    Covers(Placement, Get_Rotation(Stone))));
 
   function Covers(Point: In Point_T; Rotation: In Rotation_T) return Point_Sets.Set
-    with Pre => Fits_Dimensions (Rotation, Point);
+    with Pre => Fits_Dimensions(Rotation, Point);
 
-  function Connectives (Stone: In Rotated_Stone_T; Point: In Point_T) return Connective_Sets.Set
-    with Pre => Fits_Dimensions (Stone.Rotation, Point);
+  function Connectives (Stone: In Stone_T; Point: In Point_T) return Connective_Sets.Set
+    with Pre => Fits_Dimensions(Get_Rotation(Stone), Point);
 
-  function Fits_Dimensions (Rotation: In Rotation_T; Point: In Point_T) return Boolean;
+  function Fits_Dimensions(Rotation: In Rotation_T; Point: In Point_T) return Boolean;
 
-  --  procedure Connects (Board: In Board_T;
-  --                      Stone: In Rotated_Stone_T;
-  --                      Placement: In Point_T;
-  --                      Consistent_Connectives: Out Connective_Sets.Set;
-  --                      Increasing_Connectives: Out Connective_Sets.Set);
+  procedure Connects(Board: In Board_T;
+                     Stone: In Stone_T;
+                     Placement: In Point_T;
+                     Consistent_Connectives: Out Connective_Sets.Set;
+                     Increasing_Connectives: Out Connective_Sets.Set);
 
   function Stone_From_Borders(Northern_Border: Horizontal_Border_T;
                               Eastern_Border: Vertical_Border_T;
@@ -127,19 +124,19 @@ package Board is
                               Western_Border: Vertical_Border_T)
                               return Stone_T;
 
-  function Get_Connector (Board: In Board_T;
-                          Point: In Point_T;
-                          Direction: In Direction_T)
-                          return Connector_T;
+  function Get_Connector(Board: In Board_T;
+                         Point: In Point_T;
+                         Direction: In Direction_T)
+                         return Connector_T;
 
-  function Get_Opposing_Connector (Board: In Board_T;
-                                   Point: In Point_T;
-                                   Direction: In Direction_T)
-                                   return Connector_T;
+  function Get_Opposing_Connector(Board: In Board_T;
+                                  Point: In Point_T;
+                                  Direction: In Direction_T)
+                                  return Connector_T;
 
-  function Is_Occupied (Board: In Board_T; Point: In Point_T) return Boolean;
+  function Is_Occupied(Board: In Board_T; Point: In Point_T) return Boolean;
 
-  function Occupied_Points (Board: In Board_T) return Point_Sets.Set;
+  function Occupied_Points(Board: In Board_T) return Point_Sets.Set;
 
   Board_Error: exception;
 
@@ -156,6 +153,14 @@ package Board is
     end record;
 
   type Board_T is array (X_Coordinate, Y_Coordinate) of Board_Field_T;
-  type Stone_T is array (Stone_X_Coordinate, Stone_Y_Coordinate) of Field_T;
+  type Stone_Fields_T is array (Stone_X_Coordinate, Stone_Y_Coordinate) of Field_T;
 
+  type Stone_T is
+    record
+      Fields: Stone_Fields_T;
+      Rotation: Rotation_T := 0;
+    end record;
+
+  type Rotated_Fields_T is array (Positive range <>, Positive range <>) of Field_T;
+  function Get_Fields(Stone: Stone_T) return Rotated_Fields_T;
 end Board;
