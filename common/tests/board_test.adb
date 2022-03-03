@@ -306,21 +306,23 @@ package body Board_Test is
 
     Board: Board_T;
 
-    Placed_Stone: constant Stone_T := Stone_From_Borders(
+    Stone1: constant Stone_T := Stone_From_Borders(
       (1 => Closed, 2 => Open, 3 => Closed),
       (1 => Closed, 2 => Open),
       (1 => Open, 2 => Open, 3 => Closed),
       (1 => Closed, 2 => Open));
 
-    Placement: Point_T := (4, 3);
-
-    Stone: constant Stone_T := Stone_From_Borders(
-      (1 => Closed, 2 => Open, 3 => Closed),
-      (1 => Closed, 2 => Open),
-      (1 => Open, 2 => Open, 3 => Closed),
-      (1 => Closed, 2 => Open));
+    Stone2: constant Stone_T := Rotate(Stone_From_Borders(
+      (1 => Closed, 2 => Closed, 3 => Open),
+      (1 => Closed, 2 => Closed),
+      (1 => Closed, 2 => Closed, 3 => Open),
+      (1 => Closed, 2 => Closed)));
   begin
-    Place(Board, Placed_Stone, Placement);
+    Place(Board, Stone1, (3, 1));
+    Place(Board, Stone2, (1, 2));
+    -- C | C   O   O
+    -- C |(3,3)
+    -- O |
     AUnit.Assertions.Assert(False, "TODO: Implement tests");
   end Test_Connects;
 
