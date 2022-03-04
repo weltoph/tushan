@@ -115,8 +115,13 @@ package Board is
   procedure Connects(Board: In Board_T;
                      Stone: In Stone_T;
                      Placement: In Point_T;
-                     Consistent_Connectives: Out Connective_Sets.Set;
-                     Increasing_Connectives: Out Connective_Sets.Set);
+                     Inconsistent_Connectives: Out Connective_Sets.Set;
+                     Increasing_Connectives: Out Connective_Sets.Set)
+    with Pre => Fits_Dimensions(Get_Rotation(Stone), Placement)
+                and then Point_Sets.Is_Empty(
+                  Point_Sets.Intersection(
+                    Occupied_Points(Board),
+                    Covers(Placement, Get_Rotation(Stone))));
 
   function Stone_From_Borders(Northern_Border: Horizontal_Border_T;
                               Eastern_Border: Vertical_Border_T;
@@ -129,9 +134,17 @@ package Board is
                          Direction: In Direction_T)
                          return Connector_T;
 
+  function Get_Connector(Board: In Board_T;
+                         Connective: In Connective_T)
+                         return Connector_T;
+
   function Get_Opposing_Connector(Board: In Board_T;
                                   Point: In Point_T;
                                   Direction: In Direction_T)
+                                  return Connector_T;
+
+  function Get_Opposing_Connector(Board: In Board_T;
+                                  Connective: In Connective_T)
                                   return Connector_T;
 
   function Is_Occupied(Board: In Board_T; Point: In Point_T) return Boolean;

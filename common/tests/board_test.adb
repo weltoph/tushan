@@ -317,13 +317,120 @@ package body Board_Test is
       (1 => Closed, 2 => Closed),
       (1 => Closed, 2 => Closed, 3 => Open),
       (1 => Closed, 2 => Closed)));
+
+    Test_Stone: constant Stone_T := Stone_From_Borders(
+      (1 => Closed, 2 => Open, 3 => Open),
+      (1 => Open, 2 => Closed),
+      (1 => Open, 2 => Closed, 3 => Closed),
+      (1 => Open, 2 => Closed));
+    P: constant Point_T := (3, 3);
   begin
     Place(Board, Stone1, (3, 1));
     Place(Board, Stone2, (1, 2));
     -- C | C   O   O
     -- C |(3,3)
     -- O |
-    AUnit.Assertions.Assert(False, "TODO: Implement tests");
+
+
+
+    declare
+      Expected_Inconsistent: Connective_Sets.Set;
+      Expected_Increasing: Connective_Sets.Set;
+
+      Actual_Inconsistent: Connective_Sets.Set;
+      Actual_Increasing: Connective_Sets.Set;
+    begin
+      Connective_Sets.Include(Expected_Increasing, ((4, 3), North));
+      Connective_Sets.Include(Expected_Increasing, ((5, 3), North));
+      Connective_Sets.Include(Expected_Increasing, ((3, 4), West));
+      Connects(Board, Rotate(Test_Stone, 0), P, Actual_Inconsistent, Actual_Increasing);
+      for C of Connective_Sets.Difference(Actual_Increasing, Expected_Increasing) loop
+        Ada.Text_IO.Put_Line("Actual - Expected: <" & C.Point.X'Image & "," & C.Point.Y'Image & "," & C.Direction'Image & ">");
+      end loop;
+      for C of Connective_Sets.Difference(Expected_Increasing, Actual_Increasing) loop
+        Ada.Text_IO.Put_Line("Expected - Increasing: <" & C.Point.X'Image & "," & C.Point.Y'Image & "," & C.Direction'Image & ">");
+      end loop;
+      AUnit.Assertions.Assert(Connective_Sets.Equivalent_Sets(Actual_Inconsistent, Expected_Inconsistent),
+                              "Difference in actual and expected inconsisten connections");
+      AUnit.Assertions.Assert(Connective_Sets.Equivalent_Sets(Actual_Increasing, Expected_Increasing),
+                              "Difference in actual and expected increasing connections");
+    end;
+
+  declare
+    Expected_Inconsistent: Connective_Sets.Set;
+    Expected_Increasing: Connective_Sets.Set;
+
+    Actual_Inconsistent: Connective_Sets.Set;
+    Actual_Increasing: Connective_Sets.Set;
+  begin
+    Connective_Sets.Include(Expected_Inconsistent, ((3, 3), North));
+    Connective_Sets.Include(Expected_Inconsistent, ((4, 3), North));
+    Connective_Sets.Include(Expected_Inconsistent, ((3, 4), West));
+    Connects(Board, Rotate(Test_Stone, 1), P, Actual_Inconsistent, Actual_Increasing);
+    for C of Connective_Sets.Difference(Actual_Increasing, Expected_Increasing) loop
+      Ada.Text_IO.Put_Line("Actual - Expected: <" & C.Point.X'Image & "," & C.Point.Y'Image & "," & C.Direction'Image & ">");
+    end loop;
+    for C of Connective_Sets.Difference(Expected_Increasing, Actual_Increasing) loop
+      Ada.Text_IO.Put_Line("Expected - Increasing: <" & C.Point.X'Image & "," & C.Point.Y'Image & "," & C.Direction'Image & ">");
+    end loop;
+    AUnit.Assertions.Assert(Connective_Sets.Equivalent_Sets(Actual_Inconsistent, Expected_Inconsistent),
+                            "Difference in actual and expected inconsisten connections");
+    AUnit.Assertions.Assert(Connective_Sets.Equivalent_Sets(Actual_Increasing, Expected_Increasing),
+                            "Difference in actual and expected increasing connections");
+  end;
+
+  declare
+    Expected_Inconsistent: Connective_Sets.Set;
+    Expected_Increasing: Connective_Sets.Set;
+
+    Actual_Inconsistent: Connective_Sets.Set;
+    Actual_Increasing: Connective_Sets.Set;
+  begin
+    Connective_Sets.Include(Expected_Inconsistent, ((3, 3), North));
+    Connective_Sets.Include(Expected_Inconsistent, ((4, 3), North));
+    Connective_Sets.Include(Expected_Inconsistent, ((5, 3), North));
+
+    Connective_Sets.Include(Expected_Increasing, ((3, 4), West));
+
+    Connects(Board, Rotate(Test_Stone, 2), P, Actual_Inconsistent, Actual_Increasing);
+    for C of Connective_Sets.Difference(Actual_Increasing, Expected_Increasing) loop
+      Ada.Text_IO.Put_Line("Actual - Expected: <" & C.Point.X'Image & "," & C.Point.Y'Image & "," & C.Direction'Image & ">");
+    end loop;
+    for C of Connective_Sets.Difference(Expected_Increasing, Actual_Increasing) loop
+      Ada.Text_IO.Put_Line("Expected - Increasing: <" & C.Point.X'Image & "," & C.Point.Y'Image & "," & C.Direction'Image & ">");
+    end loop;
+    AUnit.Assertions.Assert(Connective_Sets.Equivalent_Sets(Actual_Inconsistent, Expected_Inconsistent),
+                            "Difference in actual and expected inconsisten connections");
+    AUnit.Assertions.Assert(Connective_Sets.Equivalent_Sets(Actual_Increasing, Expected_Increasing),
+                            "Difference in actual and expected increasing connections");
+  end;
+
+  declare
+    Expected_Inconsistent: Connective_Sets.Set;
+    Expected_Increasing: Connective_Sets.Set;
+
+    Actual_Inconsistent: Connective_Sets.Set;
+    Actual_Increasing: Connective_Sets.Set;
+  begin
+    Connective_Sets.Include(Expected_Inconsistent, ((3, 3), North));
+    Connective_Sets.Include(Expected_Inconsistent, ((4, 3), North));
+    Connective_Sets.Include(Expected_Inconsistent, ((3, 3), West));
+
+    Connective_Sets.Include(Expected_Increasing, ((3, 4), West));
+
+    Connects(Board, Rotate(Test_Stone, 3), P, Actual_Inconsistent, Actual_Increasing);
+    for C of Connective_Sets.Difference(Actual_Increasing, Expected_Increasing) loop
+      Ada.Text_IO.Put_Line("Actual - Expected: <" & C.Point.X'Image & "," & C.Point.Y'Image & "," & C.Direction'Image & ">");
+    end loop;
+    for C of Connective_Sets.Difference(Expected_Increasing, Actual_Increasing) loop
+      Ada.Text_IO.Put_Line("Expected - Increasing: <" & C.Point.X'Image & "," & C.Point.Y'Image & "," & C.Direction'Image & ">");
+    end loop;
+    AUnit.Assertions.Assert(Connective_Sets.Equivalent_Sets(Actual_Inconsistent, Expected_Inconsistent),
+                            "Difference in actual and expected inconsisten connections");
+    AUnit.Assertions.Assert(Connective_Sets.Equivalent_Sets(Actual_Increasing, Expected_Increasing),
+                            "Difference in actual and expected increasing connections");
+  end;
+
   end Test_Connects;
 
   -- procedure Test_Valid_Moves(T: in out AUnit.Test_Cases.Test_Case'Class)

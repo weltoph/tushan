@@ -259,13 +259,62 @@ package body Board is
     end if;
   end;
 
-  procedure Connects (Board: In Board_T;
-                      Stone: In Stone_T;
-                      Placement: In Point_T;
-                      Consistent_Connectives: Out Connective_Sets.Set;
-                      Increasing_Connectives: Out Connective_Sets.Set) is
+  procedure Connects(Board: In Board_T;
+                     Stone: In Stone_T;
+                     Placement: In Point_T;
+                     Inconsistent_Connectives: Out Connective_Sets.Set;
+                     Increasing_Connectives: Out Connective_Sets.Set) is
+    Tiles: constant Rotated_Fields_T := Get_Fields(Stone);
+
+    procedure Handle(Connective: In Connective_T; Stone_Connector: In Inner_Connector_T)
+    is
+      Board_Connector: constant Connector_T := Get_Opposing_Connector(Board, Connective.Point, Connective.Direction);
+    begin
+      if Stone_Connector = Open and Board_Connector = Closed then
+        Connective_Sets.Include(Inconsistent_Connectives, Connective);
+      end if;
+      if Stone_Connector = Closed and Board_Connector = Open then
+        Connective_Sets.Include(Inconsistent_Connectives, Connective);
+      end if;
+      if Stone_Connector = Open and Board_Connector = Open then
+        Connective_Sets.Include(Increasing_Connectives, Connective);
+      end if;
+    end Handle;
   begin
-    null;
+    Inconsistent_Connectives := Connective_Sets.Empty_Set;
+    Increasing_Connectives := Connective_Sets.Empty_Set;
+    for X in Tiles'Range(1) loop
+      declare
+        Connective: constant Connective_T := ((Placement.X + X - Tiles'First(1), Placement.Y), North);
+        Stone_Connector: constant Inner_Connector_T := Tiles(X, Tiles'First(2))(North);
+      begin
+        Handle(Connective, Stone_Connector);
+      end;
+
+      declare
+        Connective: constant Connective_T := ((Placement.X + X - Tiles'First(1), Placement.Y + Tiles'Last(2) - Tiles'First(2)), South);
+        Stone_Connector: constant Inner_Connector_T := Tiles(X, Tiles'Last(2))(South);
+      begin
+        Handle(Connective, Stone_Connector);
+      end;
+    end loop;
+
+    for Y in Tiles'Range(2) loop
+      declare
+        Connective: constant Connective_T := ((Placement.X, Placement.Y + Y - Tiles'First(2)), West);
+        Stone_Connector: constant Inner_Connector_T := Tiles(Tiles'First(1), Y)(West);
+      begin
+        Handle(Connective, Stone_Connector);
+      end;
+
+      declare
+        Connective: constant Connective_T := ((Placement.X + Tiles'Last(1) - Tiles'First(1), Placement.Y +  Y - Tiles'First(2)), East);
+        Stone_Connector: constant Inner_Connector_T := Tiles(Tiles'Last(1), Y)(East);
+      begin
+        Handle(Connective, Stone_Connector);
+      end;
+    end loop;
+
   end Connects;
 
   function Stone_From_Borders(
@@ -291,10 +340,10 @@ package body Board is
     return Stone;
   end Stone_From_Borders;
 
-  function Get_Connector (Board: In Board_T;
-                          Point: In Point_T;
-                          Direction: In Direction_T)
-                          return Connector_T is
+  function Get_Connector(Board: In Board_T;
+                         Point: In Point_T;
+                         Direction: In Direction_T)
+                         return Connector_T is
   begin
     if Is_Occupied (Board, Point) then
       return Board(Point.X, Point.Y).Field(Direction);
@@ -303,10 +352,17 @@ package body Board is
     end if;
   end Get_Connector;
 
-  function Get_Opposing_Connector (Board: In Board_T;
-                                   Point: In Point_T;
-                                   Direction: In Direction_T)
-                                   return Connector_T is
+  function Get_Connector(Board: In Board_T;
+                         Connective: In Connective_T)
+                         return Connector_T is
+  begin
+    return Get_Connector(Board, Connective.Point, Connective.Direction);
+  end Get_Connector;
+
+  function Get_Opposing_Connector(Board: In Board_T;
+                                  Point: In Point_T;
+                                  Direction: In Direction_T)
+                                  return Connector_T is
   begin
     if (Point.X = X_Coordinate'First and Direction = West)
       or (Point.X = X_Coordinate'Last and Direction = East)
@@ -341,6 +397,14 @@ package body Board is
           end if;
       end case;
     end if;
+  end Get_Opposing_Connector;
+
+
+  function Get_Opposing_Connector(Board: In Board_T;
+                                  Connective: In Connective_T)
+                                  return Connector_T is
+  begin
+    return Get_Opposing_Connector(Board, Connective.Point, Connective.Direction);
   end Get_Opposing_Connector;
 
 
