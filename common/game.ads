@@ -41,13 +41,14 @@ package Game is
     (Index_Type => Positive,
      Element_Type => Answer_Content);
 
-  protected Game_State_T is
+  protected type Game_State_T is
     function Get_Board return Game_Board.Board_T;
-    --  function Get_Player_Amount return Positive;
-    --  function Get_Sent_Messages(Player: Positive) return Message_List.Vector;
-    --  function Get_Recv_Messages(Player: Positive) return Message_List.Vector;
-  private
-    Board: Game_Board.Board_T;
+    private
+      procedure Update_Board(New_Board: In Game_Board.Board_T);
+      Board: Game_Board.Board_T;
   end Game_State_T;
+
+  private
+
 
 end Game;
