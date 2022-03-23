@@ -55,20 +55,24 @@ package Game is
 
   type Actor_T is private;
 
-  function Get_Player(Actor: Actor_T) return Player_Acc;
-  function Connects(Actor: Actor_T; Direction: Game_Board.Direction_T) return Boolean;
-
-  private
-
-  type Target_T is array (Game_Board.Direction_T) of Boolean;
-  type Actor_T is
-    record
-      Player: Player_Acc;
-      Target: Target_T;
-    end record;
-
   package Actor_List is new Ada.Containers.Vectors
     (Index_Type => Positive,
      Element_Type => Actor_T);
+
+  protected type Game_State_T is
+    function Get_Board return Game_Board.Board_T;
+    private
+      procedure Update_Board(New_Board: In Game_Board.Board_T);
+      Board: Game_Board.Board_T;
+  end Game_State_T;
+
+  private
+
+  type Objective_T is array (Game_Board.Direction_T) of Boolean;
+
+  type Actor_T is record
+    Player: Player_Acc;
+    Objective: Objective_T;
+  end record;
 
 end Game;
