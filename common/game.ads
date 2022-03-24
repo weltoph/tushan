@@ -52,12 +52,17 @@ package Game is
   function Recv_Msg(Player: In Player_T) return Answer_Content is abstract;
 
   type Player_Acc is access Player_T'Class;
+  type Objective_T is array (Game_Board.Direction_T) of boolean;
 
-  type Actor_T is private;
+  type Actor_T is record
+    Player: Player_Acc;
+    Objective: Objective_T;
+  end record;
 
   package Actor_List is new Ada.Containers.Vectors
     (Index_Type => Positive,
      Element_Type => Actor_T);
+
 
   protected type Game_State_T is
     function Get_Board return Game_Board.Board_T;
@@ -67,12 +72,4 @@ package Game is
   end Game_State_T;
 
   private
-
-  type Objective_T is array (Game_Board.Direction_T) of Boolean;
-
-  type Actor_T is record
-    Player: Player_Acc;
-    Objective: Objective_T;
-  end record;
-
 end Game;
